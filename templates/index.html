@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilités des Professeurs</title>
+</head>
+
+<body>
+    <h1>Disponibilités des Professeurs</h1>
+
+    <form id="availabilityForm">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom du Professeur</th>
+                    <th>Matière</th>
+                    <th>Classe A</th>
+                    <th>Classe B</th>
+                    <th>Classe C</th>
+                    <th>Lundi soir (Session 1)</th>
+                    <th>Lundi soir (Session 2)</th>
+                    <!-- Ajoutez d'autres jours et sessions ici -->
+                </tr>
+            </thead>
+            <tbody id="professorsTableBody">
+                <!-- Les lignes du tableau seront ajoutées ici par JavaScript -->
+            </tbody>
+        </table>
+        <button type="button" id="addRowButton">Ajouter un Professeur</button>
+        <button type="submit">Enregistrer</button>
+    </form>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+
+</html>
