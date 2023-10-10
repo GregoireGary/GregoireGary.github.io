@@ -16,24 +16,95 @@
                 <tr>
                     <th>Nom du Professeur</th>
                     <th>Matière</th>
-                    <th>Classe A</th>
-                    <th>Classe B</th>
-                    <th>Classe C</th>
-                    <th>Lundi soir (Session 1)</th>
-                    <th>Lundi soir (Session 2)</th>
+                    <th>PP de la classe</th>
+                    <th>61</th>
+                    <th>62</th>
+                    <th>63</th>
+                    <th>64</th>
+                    <th>51</th>
+                    <th>52</th>
+                    <th>53</th>
+                    <th>54</th>
+                    <th>41</th>
+                    <th>42</th>
+                    <th>43</th>
+                    <th>31</th>
+                    <th>32</th>
+                    <th>L1</th>
+                    <th>L2</th>
+                    <th>M1</th>
+                    <th>M2</th>
+                    <th>J1</th>
+                    <th>J2</th>
                     <!-- Ajoutez d'autres jours et sessions ici -->
                 </tr>
             </thead>
             <tbody id="professorsTableBody">
-                <!-- Les lignes du tableau seront ajoutées ici par JavaScript -->
+                {% for professor in data.professors %}
+                <tr>
+                    <td><input type="text" name="professor_name[]" value="{{ professor.name }}"></td>
+                    <td>
+                        <select name="professor_subject[]">
+                            <option value="math" {% if professor.subject == 'math' %} selected {% endif %}>Math</option>
+                            <option value="frs" {% if professor.subject == 'francais' %} selected {% endif %}>Frs</option>
+                            <option value="SC" {% if professor.subject == 'science' %} selected {% endif %}>SC</option>
+                            <option value="ang" {% if professor.subject == 'anglais' %} selected {% endif %}>ang</option>
+                            <option value="HG" {% if professor.subject == 'Hist-geo' %} selected {% endif %}>HG</option>
+                            <option value="art" {% if professor.subject == 'art' %} selected {% endif %}>art</option>
+                            <option value="EPS" {% if professor.subject == 'EPS' %} selected {% endif %}>EPS</option>
+                            <option value="LV2" {% if professor.subject == 'LV2' %} selected {% endif %}>LV2</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select name="professor_PP[]">
+                            <option value="-" {% if professor.PP == '-' %} selected {% endif %}>-</option>
+                            <option value="61" {% if professor.PP == '61' %} selected {% endif %}>61</option>
+                            <option value="62" {% if professor.PP == '62' %} selected {% endif %}>62</option>
+                            <option value="63" {% if professor.PP == '63' %} selected {% endif %}>63</option>
+                            <option value="64" {% if professor.PP == '64' %} selected {% endif %}>64</option>
+                            <option value="51" {% if professor.PP == '51' %} selected {% endif %}>51</option>
+                            <option value="52" {% if professor.PP == '52' %} selected {% endif %}>52</option>
+                            <option value="53" {% if professor.PP == '53' %} selected {% endif %}>53</option>
+                            <option value="54" {% if professor.PP == '54' %} selected {% endif %}>54</option>
+                            <option value="41" {% if professor.PP == '41' %} selected {% endif %}>41</option>
+                            <option value="42" {% if professor.PP == '42' %} selected {% endif %}>42</option>
+                            <option value="43" {% if professor.PP == '43' %} selected {% endif %}>43</option>
+                            <option value="31" {% if professor.PP == '31' %} selected {% endif %}>31</option>
+                            <option value="32" {% if professor.PP == '32' %} selected {% endif %}>32</option>                            
+                        </select>
+                    </td>
+                    <td><input type="checkbox" name="61[]" {% if professor.c61 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="62[]" {% if professor.c62 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="63[]" {% if professor.c63 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="64[]" {% if professor.c64 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="51[]" {% if professor.c51 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="52[]" {% if professor.c52 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="53[]" {% if professor.c53 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="54[]" {% if professor.c54 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="41[]" {% if professor.c41 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="42[]" {% if professor.c42 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="43[]" {% if professor.c43 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="31[]" {% if professor.c31 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="32[]" {% if professor.c32 %} checked {% endif %}></td>
+                    
+                    <td><input type="checkbox" name="L1[]" {% if professor.L1 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="L2[]" {% if professor.L2 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="M1[]" {% if professor.M1 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="M2[]" {% if professor.M2 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="J1[]" {% if professor.J1 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="J2[]" {% if professor.J2 %} checked {% endif %}></td>
+                    
+                    <!-- Ajoutez d'autres cases à cocher en fonction de votre structure JSON -->
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
         <button type="button" id="addRowButton">Ajouter un Professeur</button>
         <button type="submit">Enregistrer</button>
     </form>
 
+    <!-- Votre script JavaScript pour ajouter des lignes de formulaire ici -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-
 </body>
 
 </html>
