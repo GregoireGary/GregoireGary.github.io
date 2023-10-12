@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from ProfessorAvailability import ProfessorAvailability
+from classes import Classe
 import json
 
 app = Flask(__name__, static_url_path='/static')
@@ -68,6 +69,28 @@ def trouver_creneau():
         print(f"Classes: {professor_availability.classes}")
         print(f"Sessions: {professor_availability.sessions}")
         print("--------------------------")
+
+    # Supposons que professors_availability_list est la liste d'objets ProfessorAvailability
+
+    # Dictionnaire pour stocker les objets de classe
+    classes = {}
+
+    # Parcourir la liste des disponibilités des professeurs
+    for professor_availability in professors_availability_list:
+        # Parcourir la liste des classes auxquelles le professeur est associé
+        for class_number in professor_availability.classes:
+            # Vérifier si la classe existe déjà dans le dictionnaire
+            if class_number not in classes:
+                # Si non, créez un nouvel objet de classe avec le numéro de classe
+                classes[class_number] = Classe(class_number)
+            # Ajoutez le professeur à la classe correspondante
+            classes[class_number].add_professor(professor_availability)
+
+    # Affichez le contenu du dictionnaire 'classes' dans la console
+    for class_number, classe_object in classes.items():
+        print(f"Classe {class_number}:")
+        for professor in classe_object.professors:
+            print(f"    Professeur: {professor.name}, Matière: {professor.subject}")
 
 
     # Exemple de réponse avec un créneau trouvé (à adapter)
