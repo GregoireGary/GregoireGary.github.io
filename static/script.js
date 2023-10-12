@@ -135,6 +135,27 @@ function deleteRow(row) {
 // Associez la fonction `addRow` au clic du bouton "Ajouter un Professeur"
 document.getElementById("addRowButton").addEventListener("click", addRow);
 
+// Récupérez le formulaire et ajoutez un gestionnaire d'événement pour le soumettre
+document.getElementById("Find").addEventListener("click", function(event) {
+    event.preventDefault();
+
+    // Effectuez une requête POST vers la route /trouver_creneau avec les données du formulaire
+    fetch('/trouver_creneau', {
+        method: 'POST',
+        body: new FormData(document.getElementById("availabilityForm")),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Traitez la réponse JSON (les créneaux trouvés) ici
+        console.log(data);
+        // Mettez à jour l'interface utilisateur en conséquence
+    })
+    .catch(error => {
+        // Gérez les erreurs ici
+        console.error(error);
+    });
+});
+
 document.getElementById("availabilityForm").addEventListener("submit", function(event) {
     event.preventDefault();
 

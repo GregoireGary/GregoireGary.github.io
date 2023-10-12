@@ -36,7 +36,7 @@ def update():
     # Répondre avec un message de succès
     return jsonify({'message': 'Données mises à jour avec succès!'})
 
-@app.route('/trouver-creneau', methods=['POST'])
+@app.route('/trouver_creneau', methods=['POST'])
 def trouver_creneau():
     # Récupérer les données du formulaire
     data = request.form.to_dict(flat=False)
