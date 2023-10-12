@@ -54,6 +54,18 @@ function addRow() {
     cell21.innerHTML = '<input type="checkbox" name="J1[]">';
     cell22.innerHTML = '<input type="checkbox" name="J2[]">';
 
+    var deleteButton = document.createElement("button");
+    deleteButton.textContent = "x";
+    deleteButton.className = "delete-button";
+    deleteButton.addEventListener("click", function() {
+        // Appellez la fonction pour supprimer la ligne lorsque le bouton est cliqué
+        deleteRow(newRow);
+    });
+
+    // Ajoutez le bouton de suppression à une cellule de la ligne
+    var deleteCell = document.createElement("td");
+    deleteCell.appendChild(deleteButton);
+
     // Ajoutez les cellules à la nouvelle ligne
     newRow.appendChild(cell1);
     newRow.appendChild(cell2);
@@ -78,8 +90,46 @@ function addRow() {
     newRow.appendChild(cell21);
     newRow.appendChild(cell22);
 
+    // Ajoutez la cellule de suppression à la nouvelle ligne
+    newRow.appendChild(deleteCell);
+
     // Ajoutez la nouvelle ligne au corps du tableau
     tableBody.appendChild(newRow);
+}
+
+// Fonction pour ajouter le bouton de suppression à une ligne existante
+function addDeleteButtonToRow(row) {
+    var deleteButton = document.createElement("button");
+    deleteButton.textContent = "x";
+    deleteButton.className = "delete-button";
+    deleteButton.addEventListener("click", function() {
+        // Appellez la fonction pour supprimer la ligne lorsque le bouton est cliqué
+        deleteRow(row);
+    });
+
+    // Ajoutez le bouton de suppression à une cellule de la ligne
+    var deleteCell = document.createElement("td");
+    deleteCell.appendChild(deleteButton);
+
+    // Ajoutez la cellule de suppression à la fin de la ligne existante
+    row.appendChild(deleteCell);
+}
+
+// Sélectionnez toutes les lignes existantes dans le tableau
+var existingRows = document.querySelectorAll("#professorsTableBody tr");
+
+// Ajoutez le bouton de suppression à chaque ligne existante
+existingRows.forEach(function(row) {
+    addDeleteButtonToRow(row);
+});
+
+// Fonction pour supprimer une ligne
+function deleteRow(row) {
+    // Obtenez le tableau parent de la ligne
+    var tableBody = row.parentNode;
+
+    // Supprimez la ligne du tableau
+    tableBody.removeChild(row);
 }
 
 // Associez la fonction `addRow` au clic du bouton "Ajouter un Professeur"

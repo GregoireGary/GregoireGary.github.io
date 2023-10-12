@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Disponibilités des Professeurs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
@@ -46,10 +47,10 @@
                     <td>
                         <select name="professor_subject[]">
                             <option value="math" {% if professor.subject == 'math' %} selected {% endif %}>Math</option>
-                            <option value="frs" {% if professor.subject == 'francais' %} selected {% endif %}>Frs</option>
-                            <option value="SC" {% if professor.subject == 'science' %} selected {% endif %}>SC</option>
-                            <option value="ang" {% if professor.subject == 'anglais' %} selected {% endif %}>ang</option>
-                            <option value="HG" {% if professor.subject == 'Hist-geo' %} selected {% endif %}>HG</option>
+                            <option value="frs" {% if professor.subject == 'frs' %} selected {% endif %}>Frs</option>
+                            <option value="SC" {% if professor.subject == 'sc' %} selected {% endif %}>SC</option>
+                            <option value="ang" {% if professor.subject == 'ang' %} selected {% endif %}>ang</option>
+                            <option value="HG" {% if professor.subject == 'HG' %} selected {% endif %}>HG</option>
                             <option value="art" {% if professor.subject == 'art' %} selected {% endif %}>art</option>
                             <option value="EPS" {% if professor.subject == 'EPS' %} selected {% endif %}>EPS</option>
                             <option value="LV2" {% if professor.subject == 'LV2' %} selected {% endif %}>LV2</option>
@@ -101,6 +102,7 @@
         </table>
         <button type="button" id="addRowButton">Ajouter un Professeur</button>
         <button type="submit">Enregistrer</button>
+        <button type="button" id="Find">Trouver un créneau pour chaque conseil</button>
     </form>
 
     <!-- Votre script JavaScript pour ajouter des lignes de formulaire ici -->

@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from ProfessorAvailability import ProfessorAvailability
 import json
 
 app = Flask(__name__, static_url_path='/static')
@@ -33,6 +34,51 @@ def update():
 
     # Répondre avec un message de succès
     return jsonify({'message': 'Données mises à jour avec succès!'})
+
+@app.route('/trouver-creneau', methods=['POST'])
+def trouver_creneau():
+    # Récupérer les données du formulaire
+    data = request.form.to_dict(flat=False)
+
+        # Préparation des données
+
+    # Supposons que 'data' contient les données du tableau rempli par l'utilisateur
+    professors_availability_list = []
+    
+    # Boucle à travers les données et crée des objets ProfessorAvailability
+    for professor_data in data:
+        name = professor_data['professor_name'][0]  # Supposons que le nom est le premier élément de la liste
+        subject = professor_data['professor_subject'][0]  # Supposons que la matière est le premier élément de la liste
+        pp = professor_data['professor_PP'][0]  # Supposons que le professeur principal est le premier élément de la liste
+        classes_data = professor_data['classes'][0]
+        sessions_data = professor_data['sessions'][0]
+
+        # Divisez les chaînes en valeurs individuelles
+        classes_list = classes_data.split()  # Convertit la chaîne en liste de valeurs
+        sessions_list = sessions_data.split()  # Convertit la chaîne en liste de valeurs
+
+        professor_availability = ProfessorAvailability(name, subject, pp, classes_list, sessions_list)
+        professors_availability_list.append(professor_availability)
+
+    # Affichez la liste dans la console Python
+    for professor_availability in professors_availability_list:
+        print(f"Nom: {professor_availability.name}")
+        print(f"Matière: {professor_availability.subject}")
+        print(f"PP de la classe: {professor_availability.pp}")
+        print(f"Classes: {professor_availability.classes}")
+        print(f"Sessions: {professor_availability.sessions}")
+        print("--------------------------")
+
+
+    # Exemple de réponse avec un créneau trouvé (à adapter)
+    creneau = {
+        'date': '2023-11-01',
+        'heure': '14:00',
+        'salle': 'Salle 101'
+    }
+
+    # Envoyer la réponse au client au format JSON
+    return jsonify(creneau)
 
 if __name__ == '__main__':
     app.run(debug=True)
