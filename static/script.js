@@ -135,14 +135,61 @@ function deleteRow(row) {
 // Associez la fonction `addRow` au clic du bouton "Ajouter un Professeur"
 document.getElementById("addRowButton").addEventListener("click", addRow);
 
-// Récupérez le formulaire et ajoutez un gestionnaire d'événement pour le soumettre
 document.getElementById("Find").addEventListener("click", function(event) {
     event.preventDefault();
+
+    // Récupérez toutes les lignes du tableau
+    var rows = document.querySelectorAll("#professorsTableBody tr");
+    
+    // Créez un tableau pour stocker les objets JSON
+    var jsonData = [];
+
+    // Parcourez chaque ligne du tableau
+    rows.forEach(function(row) {
+        // Récupérez les éléments de la ligne
+        var name = row.querySelector("[name='professor_name[]']").value;
+        var subject = row.querySelector("[name='professor_subject[]']").value;
+        var PP = row.querySelector("[name='professor_PP[]']").value;
+
+        // Créez un objet pour stocker les classes et sessions
+        var classes = [];
+        var sessions = [];
+
+        // Ajoutez les valeurs des cases à cocher de classe (61,62, etc.)
+        ["61", "62", "63", "64", "51", "52", "53", "54", "41", "42", "43", "31", "32"].forEach(function(classe) {
+            var classeCheckbox = row.querySelector("[name='" + classe + "[]']");
+            if (classeCheckbox.checked) {
+                classes.push(classe);
+            }
+        });
+        // Ajoutez les valeurs des cases à cocher de session (L1, L2, etc.)
+        ["L1", "L2", "M1", "M2", "J1", "J2"].forEach(function(session) {
+            var sessionCheckbox = row.querySelector("[name='" + session + "[]']");
+            if (sessionCheckbox.checked) {
+                sessions.push(session);
+            }
+        });
+
+        // Créez un objet JSON pour cette ligne
+        var jsonRow = {
+            name: name,
+            subject: subject,
+            PP: PP,
+            classes: classes,
+            sessions: sessions
+        };
+
+        // Ajoutez l'objet JSON au tableau
+        jsonData.push(jsonRow);
+    });
 
     // Effectuez une requête POST vers la route /trouver_creneau avec les données du formulaire
     fetch('/trouver_creneau', {
         method: 'POST',
-        body: new FormData(document.getElementById("availabilityForm")),
+        headers: {
+            'Content-Type': 'application/json' // Indiquez que vous envoyez du JSON
+        },
+        body: JSON.stringify(jsonData) // Convertissez le tableau d'objets JavaScript en chaîne JSON
     })
     .then(response => response.json())
     .then(data => {
