@@ -1,19 +1,26 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Disponibilités des Professeurs</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
 </head>
 
 <body>
-    <h1>Disponibilités des Professeurs</h1>
-
+    <h1> Disponibilités des Professeurs <button type="button" id="Find" class="find-button right-button">Lancer calcul</button></h1>
     <form id="availabilityForm">
         <table>
             <thead>
+                <tr>
+                    <th colspan="3"></th> <!-- Colspan 2 pour les deux premières colonnes (Nom du Professeur et Matière) -->
+                    <th colspan="13">Classes</th> <!-- Colspan 20 pour les 20 colonnes suivantes -->
+                    <th colspan="6">Semaine 1</th> <!-- Colspan 20 pour les 20 colonnes suivantes -->
+                    <th colspan="4">Semaine 2</th> <!-- Colspan 20 pour les 20 colonnes suivantes -->
+                </tr>
                 <tr>
                     <th>Nom du Professeur</th>
                     <th>Matière</th>
@@ -31,12 +38,16 @@
                     <th>43</th>
                     <th>31</th>
                     <th>32</th>
-                    <th>L1</th>
-                    <th>L2</th>
-                    <th>M1</th>
-                    <th>M2</th>
-                    <th>J1</th>
-                    <th>J2</th>
+                    <th>Lundi 1</th>
+                    <th>Lundi 2</th>
+                    <th>Mardi 1</th>
+                    <th>Mardi 2</th>
+                    <th>Jeudi 1</th>
+                    <th>Jeudi 2</th>
+                    <th>Lundi 1</th>
+                    <th>Lundi 2</th>
+                    <th>Mardi 1</th>
+                    <th>Mardi 2</th>
                     <!-- Ajoutez d'autres jours et sessions ici -->
                 </tr>
             </thead>
@@ -88,21 +99,24 @@
                     <td><input type="checkbox" name="31[]" {% if professor.c31 %} checked {% endif %}></td>
                     <td><input type="checkbox" name="32[]" {% if professor.c32 %} checked {% endif %}></td>
                     
-                    <td><input type="checkbox" name="L1[]" {% if professor.L1 %} checked {% endif %}></td>
-                    <td><input type="checkbox" name="L2[]" {% if professor.L2 %} checked {% endif %}></td>
-                    <td><input type="checkbox" name="M1[]" {% if professor.M1 %} checked {% endif %}></td>
-                    <td><input type="checkbox" name="M2[]" {% if professor.M2 %} checked {% endif %}></td>
-                    <td><input type="checkbox" name="J1[]" {% if professor.J1 %} checked {% endif %}></td>
-                    <td><input type="checkbox" name="J2[]" {% if professor.J2 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="S1L1[]" {% if professor.S1L1 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="S1L2[]" {% if professor.S1L2 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="S1M1[]" {% if professor.S1M1 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="S1M2[]" {% if professor.S1M2 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="S1J1[]" {% if professor.S1J1 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="S1J2[]" {% if professor.S1J2 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="S2L1[]" {% if professor.S2L1 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="S2L2[]" {% if professor.S2L2 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="S2M1[]" {% if professor.S2M1 %} checked {% endif %}></td>
+                    <td><input type="checkbox" name="S2M2[]" {% if professor.S2M2 %} checked {% endif %}></td>
                     
                     <!-- Ajoutez d'autres cases à cocher en fonction de votre structure JSON -->
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <button type="button" id="addRowButton">Ajouter un Professeur</button>
-        <button type="button" id="Find">Trouver un créneau pour chaque conseil</button>
-        <button type="submit">Enregistrer</button>
+        <button type="button" id="addRowButton" class="find-button left-button">Ajouter un Professeur</button>
+        <button type="submit" class="find-button left-button">Enregistrer</button>
     </form>
 
     <!-- Votre script JavaScript pour ajouter des lignes de formulaire ici -->

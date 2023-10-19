@@ -1,40 +1,22 @@
-from scipy.optimize import linear_sum_assignment
+from itertools import combinations
+from collections import defaultdict
 
-# Classes avec les professeurs associés et leurs indisponibilités
-classes = {
-    61: {'Prof1': ['L1', 'L2'], 'Prof2': ['M1']},
-    62: {'Prof3': ['J1'], 'Prof4': []},
-    # Ajoutez d'autres classes avec les professeurs associés et leurs indisponibilités
-}
+# Fonction pour résoudre le problème d'attribution d'un créneau où tous les professeurs d'une classe sont libres
+def resoudre_contraintes(disponibilites):
+    # Créez un dictionnaire pour stocker les dates disponibles pour chaque classe
+    disponibilites_classes = defaultdict(list)
+    for classe, professeurs in disponibilites.items():
+        dates_libres = set.intersection(*(set(dates) for dates in professeurs.values()))
+        disponibilites_classes[classe] = list(dates_libres)
 
-# Créneaux disponibles
-creneaux = ['L1', 'L2', 'M1', 'M2', 'J1', 'J2']
+    # Trouvez un créneau où tous les professeurs d'une classe sont libres
+    creneaux_attribues = {}
+    for classe, dates_libres in disponibilites_classes.items():
+        for date in dates_libres:
+            # Vérifiez si tous les professeurs de la classe sont disponibles à cette date
+            professeurs_disponibles = [prof for prof, dates in disponibilites[classe].items() if date in dates]
+            if len(professeurs_disponibles) == len(disponibilites[classe]):
+                creneaux_attribues[classe] = date
+                break
 
-# Fonction pour résoudre le problème d'attribution des créneaux aux classes
-def resoudre_contraintes(classes, creneaux):
-    couts = []
-    for _, professeurs in classes.items():
-        cout_ligne = []
-        for creneau in creneaux:
-            # Coût élevé si le créneau est une indisponibilité pour le professeur
-            cout_ligne.append(-1 if any(creneau in indispos for indispos in professeurs.values()) else 0)
-        couts.append(cout_ligne)
-
-    couts = [[-c for c in ligne] for ligne in couts]  # L'algorithme hongrois minimise, donc nous changeons les signes
-
-    lignes, colonnes = linear_sum_assignment(couts)
-
-    assignations = {}
-    for i, classe in enumerate(classes.keys()):
-        creneau_attribue = creneaux[colonnes[i]]
-        assignations[classe] = creneau_attribue
-
-    return assignations
-
-# Résoudre les contraintes
-assignations = resoudre_contraintes(classes, creneaux)
-
-# Afficher les résultats
-print("Assignation des créneaux aux classes :")
-for classe, creneau in assignations.items():
-    print(f"Classe {classe} : Créneau {creneau}")
+    return creneaux_attribues

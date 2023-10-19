@@ -28,6 +28,10 @@ function addRow() {
     var cell20 = document.createElement("td");
     var cell21 = document.createElement("td");
     var cell22 = document.createElement("td");
+    var cell23 = document.createElement("td");
+    var cell24 = document.createElement("td");
+    var cell25 = document.createElement("td");
+    var cell26 = document.createElement("td");
 
 
     // Ajoutez du contenu aux cellules (champs de formulaire, cases à cocher, etc.)
@@ -47,12 +51,16 @@ function addRow() {
     cell14.innerHTML = '<input type="checkbox" name="43[]">';
     cell15.innerHTML = '<input type="checkbox" name="31[]">';
     cell16.innerHTML = '<input type="checkbox" name="32[]">';
-    cell17.innerHTML = '<input type="checkbox" name="L1[]">';
-    cell18.innerHTML = '<input type="checkbox" name="L2[]">';
-    cell19.innerHTML = '<input type="checkbox" name="M1[]">';
-    cell20.innerHTML = '<input type="checkbox" name="M2[]">';
-    cell21.innerHTML = '<input type="checkbox" name="J1[]">';
-    cell22.innerHTML = '<input type="checkbox" name="J2[]">';
+    cell17.innerHTML = '<input type="checkbox" name="S1L1[]">';
+    cell18.innerHTML = '<input type="checkbox" name="S1L2[]">';
+    cell19.innerHTML = '<input type="checkbox" name="S1M1[]">';
+    cell20.innerHTML = '<input type="checkbox" name="S1M2[]">';
+    cell21.innerHTML = '<input type="checkbox" name="S1J1[]">';
+    cell22.innerHTML = '<input type="checkbox" name="S1J2[]">';
+    cell23.innerHTML = '<input type="checkbox" name="S2L1[]">';
+    cell24.innerHTML = '<input type="checkbox" name="S2L2[]">';
+    cell25.innerHTML = '<input type="checkbox" name="S2M1[]">';
+    cell26.innerHTML = '<input type="checkbox" name="S2M2[]">';
 
     var deleteButton = document.createElement("button");
     deleteButton.textContent = "x";
@@ -89,6 +97,10 @@ function addRow() {
     newRow.appendChild(cell20);
     newRow.appendChild(cell21);
     newRow.appendChild(cell22);
+    newRow.appendChild(cell23);
+    newRow.appendChild(cell24);
+    newRow.appendChild(cell25);
+    newRow.appendChild(cell26);
 
     // Ajoutez la cellule de suppression à la nouvelle ligne
     newRow.appendChild(deleteCell);
@@ -163,7 +175,7 @@ document.getElementById("Find").addEventListener("click", function(event) {
             }
         });
         // Ajoutez les valeurs des cases à cocher de session (L1, L2, etc.)
-        ["L1", "L2", "M1", "M2", "J1", "J2"].forEach(function(session) {
+        ["S1L1", "S1L2", "S1M1", "S1M2", "S1J1", "S1J2", "S2L1", "S2L2", "S2M1", "S2M2"].forEach(function(session) {
             var sessionCheckbox = row.querySelector("[name='" + session + "[]']");
             if (sessionCheckbox.checked) {
                 sessions.push(session);
@@ -232,12 +244,16 @@ document.getElementById("availabilityForm").addEventListener("submit", function(
         var c43 = row.querySelector('input[name="43[]"]').checked;
         var c31 = row.querySelector('input[name="31[]"]').checked;
         var c32 = row.querySelector('input[name="32[]"]').checked;
-        var L1 = row.querySelector('input[name="L1[]"]').checked;
-        var L2 = row.querySelector('input[name="L2[]"]').checked;
-        var M1 = row.querySelector('input[name="M1[]"]').checked;
-        var M2 = row.querySelector('input[name="M2[]"]').checked;
-        var J1 = row.querySelector('input[name="J1[]"]').checked;
-        var J2 = row.querySelector('input[name="J2[]"]').checked;
+        var S1L1 = row.querySelector('input[name="S1L1[]"]').checked;
+        var S1L2 = row.querySelector('input[name="S1L2[]"]').checked;
+        var S1M1 = row.querySelector('input[name="S1M1[]"]').checked;
+        var S1M2 = row.querySelector('input[name="S1M2[]"]').checked;
+        var S1J1 = row.querySelector('input[name="S1J1[]"]').checked;
+        var S1J2 = row.querySelector('input[name="S1J2[]"]').checked;
+        var S2L1 = row.querySelector('input[name="S2L1[]"]').checked;
+        var S2L2 = row.querySelector('input[name="S2L2[]"]').checked;
+        var S2M1 = row.querySelector('input[name="S2M1[]"]').checked;
+        var S2M2 = row.querySelector('input[name="S2M2[]"]').checked;
 
         var updatedProfessor = {
             name: professorName,
@@ -256,12 +272,16 @@ document.getElementById("availabilityForm").addEventListener("submit", function(
             c43: c43,
             c31: c31,
             c32: c32,            
-            L1: L1,
-            L2: L2,
-            M1: M1,
-            M2: M2,
-            J1: J1,
-            J2: J2
+            S1L1: S1L1,
+            S1L2: S1L2,
+            S1M1: S1M1,
+            S1M2: S1M2,
+            S1J1: S1J1,
+            S1J2: S1J2,
+            S2L1: S2L1,
+            S2L2: S2L2,
+            S2M1: S2M1,
+            S2M2: S2M2,
         };
 
         // Ajouter le professeur mis à jour au tableau `updatedData`

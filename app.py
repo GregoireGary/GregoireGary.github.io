@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from ProfessorAvailability import ProfessorAvailability
 from classes import Classe
+from static.traitement import resoudre_contraintes 
 import json
 
 app = Flask(__name__, static_url_path='/static')
@@ -62,6 +63,13 @@ def trouver_creneau():
 
     # Afficher le résultat
     print(classes)
+
+    # Résoudre les contraintes
+    assignations = resoudre_contraintes(classes)
+
+    # Afficher les résultats
+    print("Assignation des créneaux aux classes :")
+    print(assignations)
 
 
     # Exemple de réponse avec un créneau trouvé (à adapter)
