@@ -70,16 +70,8 @@ def trouver_creneau():
     print("Assignation des créneaux aux classes :")
     print(assignations)
 
-
-    # Exemple de réponse avec un créneau trouvé (à adapter)
-    creneau = {
-        'date': '2023-11-01',
-        'heure': '14:00',
-        'salle': 'Salle 101'
-    }
-
     # Envoyer la réponse au client au format JSON
-    return jsonify(creneau)
+    return jsonify(assignations)
 
 if __name__ == '__main__':
     app.run(debug=True)

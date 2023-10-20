@@ -2,6 +2,8 @@
 // Récupérez le corps du tableau où les lignes seront ajoutées
 var tableBody = document.getElementById("professorsTableBody");
 
+var popup = document.getElementById("popupContainer");
+
 // Fonction pour ajouter une nouvelle ligne au tableau
 function addRow() {
     // Créez une nouvelle ligne et des cellules
@@ -207,7 +209,14 @@ document.getElementById("Find").addEventListener("click", function(event) {
     .then(data => {
         // Traitez la réponse JSON (les créneaux trouvés) ici
         console.log(data);
-        // Mettez à jour l'interface utilisateur en conséquence
+        popup.style.display = "block";
+
+        // Ajoutez un gestionnaire d'événements pour le bouton "Fermer" du popup
+        var closeButton = document.getElementById("closePopupButton");
+        closeButton.addEventListener("click", function() {
+            // Fermez le popup lorsque le bouton "Fermer" est cliqué
+            popup.style.display = "none";
+        });
     })
     .catch(error => {
         // Gérez les erreurs ici
@@ -302,7 +311,7 @@ document.getElementById("availabilityForm").addEventListener("submit", function(
     .then(function(response) {
         // Gérer la réponse du serveur ici (par exemple, afficher un message de succès)
         console.log('Données mises à jour avec succès !');
-        // Appeler la fonction d'affichage du popup après l'enregistrement des données
+        // Appeler la fonction d'affichage du popupsavesave après l'enregistrement des données
         showPopup();
     })
     .catch(function(error) {
@@ -311,22 +320,15 @@ document.getElementById("availabilityForm").addEventListener("submit", function(
     });
 });
 
-// Affiche le popup
+// Affiche le popupsave
 function showPopup() {
-    var popup = document.getElementById("myPopup");
-    popup.style.display = "block";
+    var popupsave = document.getElementById("myPopup");
+    popupsave.style.display = "block";
 
-    // Ferme le popup après 3 secondes
+    // Ferme le popupsave après 3 secondes
     setTimeout(function() {
-        popup.style.display = "none";
+        popupsave.style.display = "none";
     }, 2000);
 }
 
 
-// Ferme le popup si l'utilisateur clique ailleurs sur la page
-window.onclick = function(event) {
-    var popup = document.getElementById("myPopup");
-    if (event.target != popup && event.target.parentNode != popup) {
-        popup.style.display = "none";
-    }
-}

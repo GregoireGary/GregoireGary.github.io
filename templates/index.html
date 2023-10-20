@@ -119,16 +119,22 @@
         <button type="submit" class="find-button left-button">Enregistrer</button>
     </form>
 
-    <div class="popup" id="myPopup">
-        <div class="popup-content">
+    <div class="popupsave" id="myPopup">
+        <div class="popupsave-content">
             Les données ont été enregistrées.
         </div>
     </div>
-    
-    
+
+    <div id="popupContainer" class="popup">
+        <div class="popup-content">
+            <!-- Contenu de votre popup ici -->
+            <h2>Proposition de créneaux</h2>
+            <p id="popupContent"></p>
+            <button id="closePopupButton">Fermer</button>
+        </div>
+    </div>
 
     <!-- Votre script JavaScript pour ajouter des lignes de formulaire ici -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
-
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </html>
