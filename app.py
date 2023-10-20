@@ -41,8 +41,6 @@ def update():
 def trouver_creneau():
     # Récupérer les données du formulaire
     data = request.get_json()
-
-    print(data)
     
         # Préparation des données
 
@@ -62,8 +60,9 @@ def trouver_creneau():
             classes[class_number][name] = sessions_list
 
     # Afficher le résultat
-    print(classes)
 
+    print("***********************Lancement traitement************************")
+    
     # Résoudre les contraintes
     assignations = resoudre_contraintes(classes)
 

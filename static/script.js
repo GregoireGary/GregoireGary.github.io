@@ -302,9 +302,31 @@ document.getElementById("availabilityForm").addEventListener("submit", function(
     .then(function(response) {
         // Gérer la réponse du serveur ici (par exemple, afficher un message de succès)
         console.log('Données mises à jour avec succès !');
+        // Appeler la fonction d'affichage du popup après l'enregistrement des données
+        showPopup();
     })
     .catch(function(error) {
         // Gérer les erreurs de la requête ici
         console.error('Erreur lors de la mise à jour des données :', error);
     });
 });
+
+// Affiche le popup
+function showPopup() {
+    var popup = document.getElementById("myPopup");
+    popup.style.display = "block";
+
+    // Ferme le popup après 3 secondes
+    setTimeout(function() {
+        popup.style.display = "none";
+    }, 2000);
+}
+
+
+// Ferme le popup si l'utilisateur clique ailleurs sur la page
+window.onclick = function(event) {
+    var popup = document.getElementById("myPopup");
+    if (event.target != popup && event.target.parentNode != popup) {
+        popup.style.display = "none";
+    }
+}

@@ -98,7 +98,7 @@
                     <td><input type="checkbox" name="43[]" {% if professor.c43 %} checked {% endif %}></td>
                     <td><input type="checkbox" name="31[]" {% if professor.c31 %} checked {% endif %}></td>
                     <td><input type="checkbox" name="32[]" {% if professor.c32 %} checked {% endif %}></td>
-                    
+    
                     <td><input type="checkbox" name="S1L1[]" {% if professor.S1L1 %} checked {% endif %}></td>
                     <td><input type="checkbox" name="S1L2[]" {% if professor.S1L2 %} checked {% endif %}></td>
                     <td><input type="checkbox" name="S1M1[]" {% if professor.S1M1 %} checked {% endif %}></td>
@@ -118,6 +118,14 @@
         <button type="button" id="addRowButton" class="find-button left-button">Ajouter un Professeur</button>
         <button type="submit" class="find-button left-button">Enregistrer</button>
     </form>
+
+    <div class="popup" id="myPopup">
+        <div class="popup-content">
+            Les données ont été enregistrées.
+        </div>
+    </div>
+    
+    
 
     <!-- Votre script JavaScript pour ajouter des lignes de formulaire ici -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
