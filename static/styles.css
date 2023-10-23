@@ -169,31 +169,51 @@ input[type="checkbox"] {
     position: relative;
 }
 
+/* Style pour le conteneur du popup */
 .popup {
-    display: none;
+    display: none; /* Par défaut, le popup est masqué */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent pour assombrir le fond */
+    justify-content: center;
+    align-items: center;
+    z-index: 1; /* Assurez-vous que le popup est au-dessus de tous les autres éléments */
 }
 
+/* Style pour le contenu du popup */
 .popup-content {
-    background-color: #ffffff;
-    width: 300px;
-    margin: 100px auto;
+    background-color: #fff;
     padding: 20px;
     border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
     text-align: center;
-    position: relative;
 }
 
-.close-popup {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
+/* Style pour le texte à l'intérieur des balises <p> dans le popup */
+.popup-content p {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #333; /* Couleur du texte */
+    line-height: 1.5; /* Espacement entre les lignes */
+}
+
+/* Style pour le bouton de fermeture */
+#closePopupButton {
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
     cursor: pointer;
+    
+    margin-top: 10px;
+    margin-right: 10px;
+    transition: background-color 0.3s ease;
+    background-color: #002657; /* Couleur principale */
+    color: white;
+}
+
+#closePopupButton:hover {
+    background-color: #629c9e; /* Bleu-vert au survol */
 }

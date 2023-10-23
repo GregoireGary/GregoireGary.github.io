@@ -210,6 +210,20 @@ document.getElementById("Find").addEventListener("click", function(event) {
         // Traitez la réponse JSON (les créneaux trouvés) ici
         console.log(data);
         popup.style.display = "block";
+        
+        // Obtenez l'élément avec l'identifiant `popupContent`
+        var popupContent = document.getElementById("popupContent");
+
+        // Créez une chaîne HTML avec les nouvelles données
+        var contenuPopup = "<h2>Proposition de créneaux</h2>";
+
+        for (var classe in data) {
+            var creneau = data[classe];
+            contenuPopup += "<p>Classe " + classe + ": " + creneau + "</p>";
+        }
+
+        // Remplacez le contenu de l'élément `popupContent` avec les nouvelles données
+        popupContent.innerHTML = contenuPopup;
 
         // Ajoutez un gestionnaire d'événements pour le bouton "Fermer" du popup
         var closeButton = document.getElementById("closePopupButton");
