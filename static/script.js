@@ -208,22 +208,45 @@ document.getElementById("Find").addEventListener("click", function(event) {
     .then(response => response.json())
     .then(data => {
         // Traitez la réponse JSON (les créneaux trouvés) ici
-        console.log(data);
+        console.log(data)
+
+        var classes = ["31", "32", "41", "42", "43", "51", "52", "53", "54", "61", "62", "63", "64"];
+        // Liste des classes non trouvées
+        var classesNonTrouvees = [];
+
+        // Associez les données aux identifiants des cellules du tableau
+        classes.forEach(function(classe) {
+            var cellId = "R" + data[classe];
+            console.log(cellId);
+            var cell = document.getElementById(cellId);
+            console.log(cell);
+            if (cell) {
+                // Vérifiez si un créneau a été trouvé pour cette classe
+                if (data.hasOwnProperty(classe)) {
+                    // Vérifiez s'il y a déjà une valeur dans la cellule
+                    if (cell.textContent.trim() !== "") {
+                        // S'il y a déjà une valeur, ajoutez une virgule avant la nouvelle valeur
+                        cell.textContent += ", " + classe;
+                    } else {
+                        // Sinon, ajoutez simplement la nouvelle valeur
+                        cell.textContent = classe;
+                    }
+                } else {
+                    // Si aucun créneau n'a été trouvé, ajoutez la classe à la liste des classes non trouvées
+                    classesNonTrouvees.push(classe);
+                }
+            }
+        });
+
+        // Affichez la liste des créneaux non trouvés
+        var listeCreneauxNonTrouves = document.getElementById("creneauxNonTrouves");
+        classesNonTrouvees.forEach(function(classe) {
+            var listItem = document.createElement("li");
+            listItem.textContent = "Classe " + classe + ": Non trouvé";
+            listeCreneauxNonTrouves.appendChild(listItem);
+        });
+
         popup.style.display = "block";
-        
-        // Obtenez l'élément avec l'identifiant `popupContent`
-        var popupContent = document.getElementById("popupContent");
-
-        // Créez une chaîne HTML avec les nouvelles données
-        var contenuPopup = "<h2>Proposition de créneaux</h2>";
-
-        for (var classe in data) {
-            var creneau = data[classe];
-            contenuPopup += "<p>Classe " + classe + ": " + creneau + "</p>";
-        }
-
-        // Remplacez le contenu de l'élément `popupContent` avec les nouvelles données
-        popupContent.innerHTML = contenuPopup;
 
         // Ajoutez un gestionnaire d'événements pour le bouton "Fermer" du popup
         var closeButton = document.getElementById("closePopupButton");
@@ -344,5 +367,6 @@ function showPopup() {
         popupsave.style.display = "none";
     }, 2000);
 }
+
 
 

@@ -50,16 +50,23 @@ th {
     border-right: 1px solid #ccc;
 }
 
+.creneau-cell {
+    background-color: #629c9e; /* Bleu-vert */
+    color: white;
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    border-right: 1px solid #ccc;
+}
+
+
 /* Style des cellules de tableau */
 td {
     padding: 5px;
     border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
     border-right: 1px solid #ccc;
     text-align: center;
-}
-
-th:last-child, td:last-child {
-    border-right: none;
 }
 
 /* Style des boutons */
