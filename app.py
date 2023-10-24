@@ -1,6 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-from ProfessorAvailability import ProfessorAvailability
-from classes import Classe
 from static.traitement import resoudre_contraintes 
 import json
 
