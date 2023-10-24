@@ -1,12 +1,17 @@
 from flask import Flask, render_template, request, jsonify
 from static.traitement import resoudre_contraintes 
 import json
+import os
 
 app = Flask(__name__, static_url_path='/static')
 
 def load_data_from_json():
     try:
-        with open('/data/data.json', 'r') as json_file:
+        # Obtenez le chemin absolu du répertoire de votre script
+        script_dir = os.path.dirname(__file__)
+        # Construisez le chemin complet vers votre fichier JSON en utilisant un chemin relatif
+        json_file_path = os.path.join(script_dir, 'data', 'data.json')
+        with open(json_file_path, 'r') as json_file:
             data = json.load(json_file)
         return data
     except FileNotFoundError:
