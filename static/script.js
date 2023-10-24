@@ -217,9 +217,7 @@ document.getElementById("Find").addEventListener("click", function(event) {
         // Associez les données aux identifiants des cellules du tableau
         classes.forEach(function(classe) {
             var cellId = "R" + data[classe];
-            console.log(cellId);
             var cell = document.getElementById(cellId);
-            console.log(cell);
             if (cell) {
                 // Vérifiez si un créneau a été trouvé pour cette classe
                 if (data.hasOwnProperty(classe)) {
@@ -231,26 +229,42 @@ document.getElementById("Find").addEventListener("click", function(event) {
                         // Sinon, ajoutez simplement la nouvelle valeur
                         cell.textContent = classe;
                     }
-                } else {
-                    // Si aucun créneau n'a été trouvé, ajoutez la classe à la liste des classes non trouvées
-                    classesNonTrouvees.push(classe);
-                }
+                } 
+            }
+            else {
+                // Si aucun créneau n'a été trouvé, ajoutez la classe à la liste des classes non trouvées
+                classesNonTrouvees.push(classe);
             }
         });
 
         // Affichez la liste des créneaux non trouvés
         var listeCreneauxNonTrouves = document.getElementById("creneauxNonTrouves");
-        classesNonTrouvees.forEach(function(classe) {
-            var listItem = document.createElement("li");
-            listItem.textContent = "Classe " + classe + ": Non trouvé";
-            listeCreneauxNonTrouves.appendChild(listItem);
-        });
+        var message = "Aucun créneau trouvé pour les classes suivantes : ";
+
+        if (classesNonTrouvees.length > 0) {
+            // S'il y a des classes non trouvées, créez le message
+            message += classesNonTrouvees.join(", ");
+        } else {
+            // Sinon, affichez un message par défaut
+            message = "Tous les créneaux ont été attribués.";
+        }
+
+        var listItem = document.createElement("li");
+        listItem.textContent = message;
+        listeCreneauxNonTrouves.appendChild(listItem);
 
         popup.style.display = "block";
 
         // Ajoutez un gestionnaire d'événements pour le bouton "Fermer" du popup
         var closeButton = document.getElementById("closePopupButton");
         closeButton.addEventListener("click", function() {
+            // Réinitialisez le contenu des cellules du tableau
+        var cells = document.querySelectorAll(".creneau-result");
+        cells.forEach(function(cell) {
+            cell.textContent = "";
+        });
+
+        listeCreneauxNonTrouves.innerHTML = "";
             // Fermez le popup lorsque le bouton "Fermer" est cliqué
             popup.style.display = "none";
         });
