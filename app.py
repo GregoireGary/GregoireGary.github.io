@@ -6,7 +6,7 @@ app = Flask(__name__, static_url_path='/static')
 
 def load_data_from_json():
     try:
-        with open('data/data.json', 'r') as json_file:
+        with open('/data/data.json', 'r') as json_file:
             data = json.load(json_file)
         return data
     except FileNotFoundError:
