@@ -34,7 +34,7 @@ def update():
     loaded_data = updated_data
     
     # Écrivez les données dans le fichier JSON
-    with open('/data/data.json', 'w') as json_file:
+    with open('data/data.json', 'w') as json_file:
         json.dump(updated_data, json_file)
 
     # Répondre avec un message de succès

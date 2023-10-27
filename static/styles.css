@@ -156,26 +156,6 @@ input[type="checkbox"] {
     background-color: #629c9e; /* Bleu-vert au survol */
 }
 
-.popupsave {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.popupsave-content {
-    background-color: #ffffff;
-    width: 300px;
-    margin: 100px auto;
-    padding: 20px;
-    border-radius: 5px;
-    text-align: center;
-    position: relative;
-}
-
 /* Style pour le conteneur du popup */
 .popup {
     display: none; /* Par défaut, le popup est masqué */
