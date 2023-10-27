@@ -21,12 +21,14 @@
             "S1L2": true,
             "S1M1": true,
             "S1M2": true,
-            "S1J1": true,
-            "S1J2": true,
+            "S1J1": false,
+            "S1J2": false,
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Nathalie VANOPDENBOSCH",
@@ -45,7 +47,7 @@
             "c43": false,
             "c31": false,
             "c32": true,
-            "S1L1": true,
+            "S1L1": false,
             "S1L2": true,
             "S1M1": true,
             "S1M2": true,
@@ -54,7 +56,9 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Pauline LE BOT",
@@ -82,7 +86,9 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Jocelyne ANDRE",
@@ -110,7 +116,9 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Erwan MORIO",
@@ -129,16 +137,18 @@
             "c43": false,
             "c31": false,
             "c32": true,
-            "S1L1": true,
+            "S1L1": false,
             "S1L2": true,
             "S1M1": true,
             "S1M2": true,
             "S1J1": true,
             "S1J2": true,
-            "S2L1": true,
+            "S2L1": false,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Helene CALVEZ",
@@ -157,16 +167,18 @@
             "c43": false,
             "c31": false,
             "c32": false,
-            "S1L1": true,
+            "S1L1": false,
             "S1L2": true,
             "S1M1": true,
             "S1M2": true,
             "S1J1": true,
             "S1J2": true,
-            "S2L1": true,
+            "S2L1": false,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Stephanie URBAIN",
@@ -194,7 +206,9 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Karine LE HENAFF",
@@ -213,16 +227,18 @@
             "c43": false,
             "c31": true,
             "c32": false,
-            "S1L1": true,
-            "S1L2": true,
-            "S1M1": true,
-            "S1M2": true,
+            "S1L1": false,
+            "S1L2": false,
+            "S1M1": false,
+            "S1M2": false,
             "S1J1": true,
             "S1J2": true,
-            "S2L1": true,
-            "S2L2": true,
-            "S2M1": true,
-            "S2M2": true
+            "S2L1": false,
+            "S2L2": false,
+            "S2M1": false,
+            "S2M2": false,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Gwendal HAYS",
@@ -250,7 +266,9 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Isabelle ROY",
@@ -269,16 +287,18 @@
             "c43": false,
             "c31": false,
             "c32": false,
-            "S1L1": true,
+            "S1L1": false,
             "S1L2": true,
             "S1M1": true,
             "S1M2": true,
             "S1J1": true,
             "S1J2": true,
-            "S2L1": true,
+            "S2L1": false,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Morgane TOUPIN",
@@ -301,12 +321,14 @@
             "S1L2": true,
             "S1M1": true,
             "S1M2": true,
-            "S1J1": true,
+            "S1J1": false,
             "S1J2": true,
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Karim TOUIBI",
@@ -334,7 +356,9 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Pauline BOURBIGOT",
@@ -362,7 +386,9 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Eric ANNOTHE",
@@ -390,11 +416,13 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Vincent BLANCHARD",
-            "subject": "art",
+            "subject": "EPS",
             "PP": "52",
             "c61": false,
             "c62": false,
@@ -409,16 +437,18 @@
             "c43": false,
             "c31": false,
             "c32": false,
-            "S1L1": true,
-            "S1L2": true,
-            "S1M1": true,
-            "S1M2": true,
+            "S1L1": false,
+            "S1L2": false,
+            "S1M1": false,
+            "S1M2": false,
             "S1J1": true,
             "S1J2": true,
-            "S2L1": true,
-            "S2L2": true,
-            "S2M1": true,
-            "S2M2": true
+            "S2L1": false,
+            "S2L2": false,
+            "S2M1": false,
+            "S2M2": false,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Charles MAVIC",
@@ -446,11 +476,13 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Maria GIL COLADO",
-            "subject": "art",
+            "subject": "LV2",
             "PP": "53",
             "c61": false,
             "c62": false,
@@ -465,20 +497,22 @@
             "c43": false,
             "c31": false,
             "c32": false,
-            "S1L1": true,
-            "S1L2": true,
-            "S1M1": true,
-            "S1M2": true,
+            "S1L1": false,
+            "S1L2": false,
+            "S1M1": false,
+            "S1M2": false,
             "S1J1": true,
             "S1J2": true,
-            "S2L1": true,
-            "S2L2": true,
-            "S2M1": true,
-            "S2M2": true
+            "S2L1": false,
+            "S2L2": false,
+            "S2M1": false,
+            "S2M2": false,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Sebastien LE LANNIER",
-            "subject": "math",
+            "subject": "EPS",
             "PP": "54",
             "c61": false,
             "c62": false,
@@ -493,16 +527,18 @@
             "c43": false,
             "c31": false,
             "c32": false,
-            "S1L1": true,
-            "S1L2": true,
+            "S1L1": false,
+            "S1L2": false,
             "S1M1": true,
             "S1M2": true,
-            "S1J1": true,
-            "S1J2": true,
-            "S2L1": true,
-            "S2L2": true,
+            "S1J1": false,
+            "S1J2": false,
+            "S2L1": false,
+            "S2L2": false,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Florence DESCLAUX",
@@ -530,11 +566,13 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Anne-Julie DIASCORN",
-            "subject": "art",
+            "subject": "math",
             "PP": "43",
             "c61": false,
             "c62": false,
@@ -558,11 +596,13 @@
             "S2L1": true,
             "S2L2": true,
             "S2M1": true,
-            "S2M2": true
+            "S2M2": true,
+            "S2J1": true,
+            "S2J2": true
         },
         {
             "name": "Marie-Gab. LE QUERE",
-            "subject": "art",
+            "subject": "math",
             "PP": "32",
             "c61": false,
             "c62": false,
@@ -577,16 +617,18 @@
             "c43": false,
             "c31": false,
             "c32": true,
-            "S1L1": true,
-            "S1L2": true,
-            "S1M1": true,
-            "S1M2": true,
+            "S1L1": false,
+            "S1L2": false,
+            "S1M1": false,
+            "S1M2": false,
             "S1J1": true,
             "S1J2": true,
-            "S2L1": true,
-            "S2L2": true,
-            "S2M1": true,
-            "S2M2": true
+            "S2L1": false,
+            "S2L2": false,
+            "S2M1": false,
+            "S2M2": false,
+            "S2J1": true,
+            "S2J2": true
         }
     ]
 }

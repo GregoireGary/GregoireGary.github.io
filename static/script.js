@@ -34,6 +34,8 @@ function addRow() {
     var cell24 = document.createElement("td");
     var cell25 = document.createElement("td");
     var cell26 = document.createElement("td");
+    var cell27 = document.createElement("td");
+    var cell28 = document.createElement("td");
 
 
     // Ajoutez du contenu aux cellules (champs de formulaire, cases à cocher, etc.)
@@ -63,6 +65,8 @@ function addRow() {
     cell24.innerHTML = '<input type="checkbox" name="S2L2[]">';
     cell25.innerHTML = '<input type="checkbox" name="S2M1[]">';
     cell26.innerHTML = '<input type="checkbox" name="S2M2[]">';
+    cell27.innerHTML = '<input type="checkbox" name="S2J1[]">';
+    cell28.innerHTML = '<input type="checkbox" name="S2J2[]">';
 
     var deleteButton = document.createElement("button");
     deleteButton.textContent = "x";
@@ -103,6 +107,8 @@ function addRow() {
     newRow.appendChild(cell24);
     newRow.appendChild(cell25);
     newRow.appendChild(cell26);
+    newRow.appendChild(cell27);
+    newRow.appendChild(cell28);
 
     // Ajoutez la cellule de suppression à la nouvelle ligne
     newRow.appendChild(deleteCell);
@@ -177,7 +183,7 @@ document.getElementById("Find").addEventListener("click", function(event) {
             }
         });
         // Ajoutez les valeurs des cases à cocher de session (L1, L2, etc.)
-        ["S1L1", "S1L2", "S1M1", "S1M2", "S1J1", "S1J2", "S2L1", "S2L2", "S2M1", "S2M2"].forEach(function(session) {
+        ["S1L1", "S1L2", "S1M1", "S1M2", "S1J1", "S1J2", "S2L1", "S2L2", "S2M1", "S2M2", "S2J1", "S2J2"].forEach(function(session) {
             var sessionCheckbox = row.querySelector("[name='" + session + "[]']");
             if (sessionCheckbox.checked) {
                 sessions.push(session);
@@ -249,7 +255,7 @@ document.getElementById("Find").addEventListener("click", function(event) {
             message = "Tous les créneaux ont été attribués.";
         }
 
-        var listItem = document.createElement("li");
+        var listItem = document.createElement("p");
         listItem.textContent = message;
         listeCreneauxNonTrouves.appendChild(listItem);
 
@@ -314,6 +320,8 @@ document.getElementById("availabilityForm").addEventListener("submit", function(
         var S2L2 = row.querySelector('input[name="S2L2[]"]').checked;
         var S2M1 = row.querySelector('input[name="S2M1[]"]').checked;
         var S2M2 = row.querySelector('input[name="S2M2[]"]').checked;
+        var S2J1 = row.querySelector('input[name="S2J1[]"]').checked;
+        var S2J2 = row.querySelector('input[name="S2J2[]"]').checked;
 
         var updatedProfessor = {
             name: professorName,
@@ -342,6 +350,8 @@ document.getElementById("availabilityForm").addEventListener("submit", function(
             S2L2: S2L2,
             S2M1: S2M1,
             S2M2: S2M2,
+            S2J1: S2J1,
+            S2J2: S2J2,
         };
 
         // Ajouter le professeur mis à jour au tableau `updatedData`
@@ -361,6 +371,7 @@ document.getElementById("availabilityForm").addEventListener("submit", function(
     })
     .then(function(response) {
         // Gérer la réponse du serveur ici (par exemple, afficher un message de succès)
+        console.log(data)
         console.log('Données mises à jour avec succès !');
         // Appeler la fonction d'affichage du popupsavesave après l'enregistrement des données
         showPopup();
