@@ -224,3 +224,15 @@ input[type="checkbox"] {
 #closePopupButton:hover {
     background-color: #629c9e; /* Bleu-vert au survol */
 }
+
+.table-container {
+    overflow-y: scroll;
+    height: 700px; /* Hauteur du conteneur */
+}
+
+.fixed-header-row {
+    position: sticky;
+    top: 0;
+    background-color: white; /* Fond blanc pour masquer les lignes figées lors du défilement */
+    z-index: 1;
+}

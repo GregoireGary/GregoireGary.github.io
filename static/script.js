@@ -382,5 +382,3 @@ function showPopup() {
     }, 2000);
 }
 
-
-
