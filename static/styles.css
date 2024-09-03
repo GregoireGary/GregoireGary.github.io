@@ -156,6 +156,61 @@ input[type="checkbox"] {
     background-color: #629c9e; /* Bleu-vert au survol */
 }
 
+/* Conteneur pour les boutons Télécharger et Importer */
+.action-buttons {
+    clear: both;
+    display: flex; /* Utiliser flexbox pour aligner les boutons horizontalement */
+    align-items: center; /* Aligner verticalement les boutons au centre */
+    margin-top: 60px; /* Espacement au-dessus du conteneur */
+    margin-left: 20px; /* Espacement a gauche du conteneur */
+}
+
+/* Style spécifique pour le bouton Importer */
+.import-button {
+    margin-left: 10px; /* Espacement entre les boutons */
+}
+
+
+/* Style du bouton à l'intérieur du conteneur .download-button */
+.download-button button {
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #217346; /* Couleur principale d'Excel (vert) */
+    color: white;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.download-button button:hover {
+    background-color: #1c6d34; /* Couleur d'hover (vert plus foncé) */
+    transform: scale(1.05); /* Léger agrandissement au survol */
+}
+
+
+/* Style du bouton Importer */
+.import-button button {
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #0078D4; /* Couleur pour le bouton Importer (bleu Microsoft) */
+    color: white;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.import-button button:hover {
+    background-color: #005a9e; /* Couleur d'hover pour le bouton Importer */
+    transform: scale(1.05); /* Léger agrandissement au survol */
+}
+
+/* Style du label pour l'input file pour masquer l'input réel */
+.import-label {
+    cursor: pointer; /* Cours du pointeur pour indiquer que c'est cliquable */
+}
+
 /* Style pour le conteneur du popup */
 .popup {
     display: none; /* Par défaut, le popup est masqué */

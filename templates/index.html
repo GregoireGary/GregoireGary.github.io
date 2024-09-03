@@ -16,7 +16,7 @@
                 <thead>
                     <tr>
                         <th colspan="3"></th> <!-- Colspan 2 pour les deux premières colonnes (Nom du Professeur et Matière) -->
-                        <th colspan="13">Classes</th> <!-- Colspan 20 pour les 20 colonnes suivantes -->
+                        <th colspan="16">Classes</th> <!-- Colspan 20 pour les 20 colonnes suivantes -->
                         <th colspan="6">Semaine 1</th> <!-- Colspan 20 pour les 20 colonnes suivantes -->
                         <th colspan="6">Semaine 2</th> <!-- Colspan 20 pour les 20 colonnes suivantes -->
                     </tr>
@@ -35,8 +35,11 @@
                         <th>41</th>
                         <th>42</th>
                         <th>43</th>
+                        <th>44</th>
                         <th>31</th>
                         <th>32</th>
+                        <th>33</th>
+                        <th>34</th>
                         <th>Lundi 1</th>
                         <th>Lundi 2</th>
                         <th>Mardi 1</th>
@@ -82,8 +85,11 @@
                                 <option value="41" {% if professor.PP == '41' %} selected {% endif %}>41</option>
                                 <option value="42" {% if professor.PP == '42' %} selected {% endif %}>42</option>
                                 <option value="43" {% if professor.PP == '43' %} selected {% endif %}>43</option>
+                                <option value="44" {% if professor.PP == '44' %} selected {% endif %}>44</option>
                                 <option value="31" {% if professor.PP == '31' %} selected {% endif %}>31</option>
-                                <option value="32" {% if professor.PP == '32' %} selected {% endif %}>32</option>                            
+                                <option value="32" {% if professor.PP == '32' %} selected {% endif %}>32</option>
+                                <option value="33" {% if professor.PP == '33' %} selected {% endif %}>33</option>
+                                <option value="34" {% if professor.PP == '34' %} selected {% endif %}>34</option>                            
                             </select>
                         </td>
                         <td><input type="checkbox" name="61[]" {% if professor.c61 %} checked {% endif %}></td>
@@ -97,8 +103,11 @@
                         <td><input type="checkbox" name="41[]" {% if professor.c41 %} checked {% endif %}></td>
                         <td><input type="checkbox" name="42[]" {% if professor.c42 %} checked {% endif %}></td>
                         <td><input type="checkbox" name="43[]" {% if professor.c43 %} checked {% endif %}></td>
+                        <td><input type="checkbox" name="44[]" {% if professor.c44 %} checked {% endif %}></td>
                         <td><input type="checkbox" name="31[]" {% if professor.c31 %} checked {% endif %}></td>
                         <td><input type="checkbox" name="32[]" {% if professor.c32 %} checked {% endif %}></td>
+                        <td><input type="checkbox" name="33[]" {% if professor.c33 %} checked {% endif %}></td>
+                        <td><input type="checkbox" name="34[]" {% if professor.c34 %} checked {% endif %}></td>
         
                         <td><input type="checkbox" name="S1L1[]" {% if professor.S1L1 %} checked {% endif %}></td>
                         <td><input type="checkbox" name="S1L2[]" {% if professor.S1L2 %} checked {% endif %}></td>
@@ -119,8 +128,25 @@
             </table>
         </div>
         <button type="button" id="addRowButton" class="find-button left-button">Ajouter un Professeur</button>
-        <button type="submit" class="find-button left-button">Enregistrer</button>
+        <!-- <button type="submit" class="find-button left-button">Enregistrer</button> -->
     </form>
+    <!-- Conteneur pour les boutons Télécharger et Importer -->
+    <div class="action-buttons">
+        <!-- Bouton Télécharger -->
+        <div class="download-button">
+            <a href="{{ url_for('telecharger_modele') }}">
+                <button>Télécharger le Modèle Excel</button>
+            </a>
+        </div>
+        
+        <!-- Bouton Importer -->
+        <div class="import-button">
+            <label for="file-upload" class="import-label">
+                <button>Importer</button>
+            </label>
+            <input type="file" id="file-upload" accept=".xlsx, .xls" style="display: none;">
+        </div>
+    </div>
 
     <div id="myPopup" class="popup" >
         <div class="popup-content">
@@ -173,7 +199,7 @@
             <button id="closePopupButton">Fermer</button>
         </div>
     </div>
-    <!-- Votre script JavaScript pour ajouter des lignes de formulaire ici -->
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
 <script src="../static/script.js"></script>
 </html>

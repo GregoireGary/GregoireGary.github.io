@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 from static.traitement import resoudre_contraintes 
 import json
 import os
@@ -25,20 +25,12 @@ loaded_data = load_data_from_json()
 def index():
     return render_template('index.html', data=loaded_data)
 
-@app.route('/update', methods=['POST'])
-def update():
-    global loaded_data
-    updated_data = request.get_json()
-    
-    # Mettre à jour les données chargées avec les nouvelles données
-    loaded_data = updated_data
-    
-    # Écrivez les données dans le fichier JSON
-    with open('data/data.json', 'w') as json_file:
-        json.dump(updated_data, json_file)
-
-    # Répondre avec un message de succès
-    return jsonify({'message': 'Données mises à jour avec succès!'})
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    data = request.json  # Recevez les données JSON envoyées depuis le client
+    # Traitez les données comme vous le souhaitez
+    print(data)  # Affiche les données dans le terminal pour vérification
+    return jsonify({'status': 'success'})
 
 @app.route('/trouver_creneau', methods=['POST'])
 def trouver_creneau():
@@ -75,6 +67,12 @@ def trouver_creneau():
 
     # Envoyer la réponse au client au format JSON
     return jsonify(assignations)
+
+# Route pour télécharger le modèle Excel
+@app.route('/telecharger_modele')
+def telecharger_modele():
+    chemin_du_fichier = 'data/Modele.xlsx'
+    return send_file(chemin_du_fichier, as_attachment=True, download_name='modele_import_professeurs.xlsx')
 
 if __name__ == '__main__':
     app.run(debug=True)
