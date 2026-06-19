@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Outil de gestion</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+
+<body class="home-body">
+    <main class="home-wrapper">
+        <section class="home-hero">
+            <p class="home-kicker">Coucou Karine</p>
+            <h1 class="home-title">Qu'est ce que l'on fait aujourd'hui ?</h1>
+            <p class="home-subtitle">
+                Cet outil te permet soit de préparer les conseils de classes,
+                soit de travailler sur la creation de classes.
+            </p>
+        </section>
+
+        <section class="home-grid">
+            <a class="home-card" href="{{ url_for('conseils_de_classe') }}">
+                <h2>Conseils de classe</h2>
+                <p>Lancer les calculs de creneaux en fonction des disponibilites des professeurs.</p>
+                <span class="home-card-cta">Ouvrir</span>
+            </a>
+
+            <a class="home-card" href="{{ url_for('creation_classe') }}">
+                <h2>Creation de classe</h2>
+                <p>Acceder a l'espace dedie a la construction et l'organisation des classes.</p>
+                <span class="home-card-cta">Ouvrir</span>
+            </a>
+        </section>
+    </main>
+</body>
+
+</html>

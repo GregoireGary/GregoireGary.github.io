@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création de classe</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+
+<body class="wizard-body">
+    <div class="wizard-wrapper">
+
+        <div class="wizard-header">
+            <a class="wizard-back-link" href="{{ url_for('home') }}">← Accueil</a>
+            <h1 class="wizard-title">Création de classe</h1>
+        </div>
+
+        <!-- Indicateur d'étapes -->
+        <div class="wizard-steps" id="wizard-steps">
+            <div class="wizard-step-item active" id="step-indicator-1">
+                <div class="wizard-step-circle">1</div>
+                <span class="wizard-step-label">Niveau</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-item" id="step-indicator-2">
+                <div class="wizard-step-circle">2</div>
+                <span class="wizard-step-label">Nb de classes</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-item" id="step-indicator-3">
+                <div class="wizard-step-circle">3</div>
+                <span class="wizard-step-label">Élèves</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-item" id="step-indicator-4">
+                <div class="wizard-step-circle">4</div>
+                <span class="wizard-step-label">Contraintes</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-item" id="step-indicator-5">
+                <div class="wizard-step-circle">5</div>
+                <span class="wizard-step-label">Règles globales</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-item" id="step-indicator-6">
+                <div class="wizard-step-circle">6</div>
+                <span class="wizard-step-label">Contraintes élèves</span>
+            </div>
+        </div>
+
+        <!-- Étape 1 : Niveau -->
+        <div class="wizard-panel active" id="panel-1">
+            <h2 class="wizard-panel-title">Quel niveau ?</h2>
+            <div class="level-grid">
+                <label class="level-card">
+                    <input type="radio" name="niveau" value="6ème">
+                    <span class="level-card-inner">6<sup>ème</sup></span>
+                </label>
+                <label class="level-card">
+                    <input type="radio" name="niveau" value="5ème">
+                    <span class="level-card-inner">5<sup>ème</sup></span>
+                </label>
+                <label class="level-card">
+                    <input type="radio" name="niveau" value="4ème">
+                    <span class="level-card-inner">4<sup>ème</sup></span>
+                </label>
+                <label class="level-card">
+                    <input type="radio" name="niveau" value="3ème">
+                    <span class="level-card-inner">3<sup>ème</sup></span>
+                </label>
+            </div>
+            <p class="wizard-error hidden" id="error-1">Veuillez choisir un niveau.</p>
+        </div>
+
+        <!-- Étape 2 : Nombre de classes -->
+        <div class="wizard-panel" id="panel-2">
+            <h2 class="wizard-panel-title">Combien de classes souhaitez-vous créer ?</h2>
+            <div class="nb-grid">
+                <label class="nb-card"><input type="radio" name="nb_classes" value="1"><span>1</span></label>
+                <label class="nb-card"><input type="radio" name="nb_classes" value="2"><span>2</span></label>
+                <label class="nb-card"><input type="radio" name="nb_classes" value="3"><span>3</span></label>
+                <label class="nb-card"><input type="radio" name="nb_classes" value="4"><span>4</span></label>
+                <label class="nb-card"><input type="radio" name="nb_classes" value="5"><span>5</span></label>
+            </div>
+            <p class="wizard-error hidden" id="error-2">Veuillez choisir un nombre de classes.</p>
+        </div>
+
+        <!-- Étape 3 : Import CSV -->
+        <div class="wizard-panel" id="panel-3">
+            <h2 class="wizard-panel-title">Importez la liste des élèves</h2>
+            <p class="wizard-panel-hint">Fichier CSV avec 4 colonnes : <strong>Nom de famille</strong>, <strong>Prénom</strong>, <strong>École d'origine</strong>, <strong>Demande particulière</strong> — une ligne par élève.</p>
+            <div class="csv-zone" id="csv-zone">
+                <input type="file" id="csv-file" accept=".csv" class="csv-file-input">
+                <div class="csv-zone-label">
+                    <span class="csv-zone-icon">📄</span>
+                    <p>Glisser-déposer un fichier CSV<br>ou <strong>cliquer pour choisir</strong></p>
+                </div>
+            </div>
+            <div id="students-preview-container" class="hidden">
+                <p class="students-count" id="students-count"></p>
+                <ul class="students-preview" id="students-preview"></ul>
+            </div>
+            <p class="wizard-error hidden" id="error-3">Veuillez importer un fichier CSV avec au moins un élève.</p>
+        </div>
+
+        <!-- Étape 4 : Contraintes de placement -->
+        <div class="wizard-panel" id="panel-4">
+            <h2 class="wizard-panel-title">Forcer des élèves dans une classe <span class="wizard-panel-optional">(optionnel)</span></h2>
+            <p class="wizard-panel-hint">Sélectionnez des élèves à placer obligatoirement dans une classe. Les autres seront répartis aléatoirement.</p>
+            <div class="preassign-grid" id="preassign-grid"></div>
+        </div>
+
+        <!-- Étape 5 : Contraintes globales -->
+        <div class="wizard-panel" id="panel-5">
+            <h2 class="wizard-panel-title">Contraintes générales de répartition</h2>
+            <p class="wizard-panel-hint">Définissez les règles globales. La mixité est enregistrée pour le moteur de répartition avancé.</p>
+
+            <div class="global-constraints-grid">
+                <label class="gc-field">
+                    <span>Nombre max d'élèves par classe</span>
+                    <input type="number" id="gc-max-per-class" min="1" placeholder="Ex: 30">
+                </label>
+
+                <label class="gc-field">
+                    <span>Mixité min (%) par classe</span>
+                    <input type="number" id="gc-mixity-min" min="0" max="100" placeholder="Ex: 40">
+                </label>
+
+                <label class="gc-field">
+                    <span>Min d'élèves d'une même école par classe</span>
+                    <input type="number" id="gc-min-same-school" min="1" placeholder="Ex: 2">
+                </label>
+            </div>
+
+            <p class="wizard-error hidden" id="error-5">Paramètres invalides.</p>
+        </div>
+
+        <!-- Étape 6 : Contraintes par élève -->
+        <div class="wizard-panel" id="panel-6">
+            <h2 class="wizard-panel-title">Contraintes individuelles par élève</h2>
+            <p class="wizard-panel-hint">Table préchargée depuis la colonne 4 du CSV. Vous pouvez ajouter/retirer des contraintes avec ou pas avec pour chaque élève, et préciser il / elle si besoin.</p>
+
+            <div class="constraints-search-wrap">
+                <input type="text" id="constraints-search" class="constraints-search-input" placeholder="Rechercher un élève, une école ou une demande..." autocomplete="off">
+            </div>
+
+            <div class="constraints-table-wrap">
+              <div class="constraints-table-scroll">
+                <table class="constraints-table">
+                    <colgroup>
+                        <col class="col-eleve">
+                        <col class="col-ecole">
+                        <col class="col-genre">
+                        <col class="col-demande">
+                        <col class="col-chips">
+                        <col class="col-operator">
+                        <col class="col-add">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Élève</th>
+                            <th>École</th>
+                            <th>Genre</th>
+                            <th>Demande importée</th>
+                            <th>Contraintes actives</th>
+                            <th>Opérateur</th>
+                            <th>Ajouter une contrainte</th>
+                        </tr>
+                    </thead>
+                    <tbody id="constraints-editor-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <p class="wizard-error hidden" id="error-6">Contraintes invalides.</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="wizard-nav" id="wizard-nav">
+            <button class="wizard-btn secondary hidden" id="btn-prev">← Précédent</button>
+            <button class="wizard-btn primary" id="btn-next">Suivant →</button>
+        </div>
+
+        <!-- Résultats -->
+        <div id="results-section" class="hidden">
+            <h2 class="wizard-panel-title">Répartition proposée</h2>
+            <p class="wizard-panel-hint">
+                <span id="res-count"></span> élèves répartis aléatoirement dans
+                <span id="res-nb"></span> classe(s) de <span id="res-niveau"></span>.
+            </p>
+            <div class="result-indicators" id="result-indicators"></div>
+            <div class="result-search-bar">
+                <input type="text" id="result-student-search" class="result-search-input" placeholder="Rechercher un élève dans les classes..." autocomplete="off">
+                <span id="result-search-count" class="result-search-count"></span>
+            </div>
+            <div class="result-grid" id="result-grid"></div>
+            <div class="wizard-nav">
+                <button class="wizard-btn secondary" id="btn-recommencer">Recommencer</button>
+                <button class="wizard-btn secondary" id="btn-export-excel">Exporter en Excel</button>
+                <button class="wizard-btn primary" id="btn-relancer">Nouvelle répartition aléatoire</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal confirmation déplacement élève -->
+    <div id="move-confirm-modal" class="move-modal-overlay hidden" role="dialog" aria-modal="true">
+        <div class="move-modal">
+            <div class="move-modal-header">
+                <span class="move-modal-icon">↔</span>
+                <h3 class="move-modal-title" id="move-modal-title">Confirmer le déplacement</h3>
+            </div>
+            <p class="move-modal-desc" id="move-modal-desc"></p>
+            <div class="move-modal-delta" id="move-modal-delta"></div>
+            <div class="move-modal-actions">
+                <button type="button" class="wizard-btn secondary" id="move-modal-cancel">Annuler</button>
+                <button type="button" class="wizard-btn primary" id="move-modal-confirm">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-modal" class="loading-modal-overlay hidden" role="status" aria-live="polite" aria-busy="true">
+        <div class="loading-modal-card">
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <h3 class="loading-modal-title">Calcul en cours...</h3>
+            <p class="loading-modal-text">Le moteur teste plusieurs configurations pour garder la meilleure.</p>
+        </div>
+    </div>
+
+    <script src="../static/creation_classe.js"></script>
+</body>
+
+</html>
