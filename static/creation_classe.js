@@ -674,8 +674,17 @@ document.getElementById('btn-prev').addEventListener('click', function () {
 // ─── CSV : encodage + parsing ────────────────────
 const csvZone      = document.getElementById('csv-zone');
 const csvFileInput = document.getElementById('csv-file');
+let isOpeningFileDialog = false;
 
-csvZone.addEventListener('click', () => csvFileInput.click());
+csvZone.addEventListener('click', (e) => {
+    if (e.target === csvFileInput || isOpeningFileDialog) return;
+    isOpeningFileDialog = true;
+    csvFileInput.click();
+    setTimeout(() => { isOpeningFileDialog = false; }, 0);
+});
+csvFileInput.addEventListener('click', (e) => {
+    e.stopPropagation();
+});
 csvZone.addEventListener('dragover', (e) => { e.preventDefault(); csvZone.classList.add('drag-over'); });
 csvZone.addEventListener('dragleave', () => csvZone.classList.remove('drag-over'));
 csvZone.addEventListener('drop', (e) => {
