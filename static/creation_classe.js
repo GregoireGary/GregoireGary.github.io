@@ -6,6 +6,12 @@ let preAssignations = {}; // { "6ème - Classe 1": ["fullName", ...] }
 let currentRepartition = {};
 let dragPayload = null;
 let resultSearchQuery = '';
+let pendingImportModalResolver = null;
+let currentImportPreviewRows = [];
+let currentImportDetectedHeaderRowIndex = -1;
+let currentImportDetection = null;
+let importModalIsAdvancedMode = false;
+let currentImportFileName = '';
 
 console.log('[INIT] MAX_STEPS=', MAX_STEPS, 'currentStep=', currentStep);
 
@@ -675,28 +681,683 @@ csvZone.addEventListener('dragleave', () => csvZone.classList.remove('drag-over'
 csvZone.addEventListener('drop', (e) => {
     e.preventDefault();
     csvZone.classList.remove('drag-over');
-    if (e.dataTransfer.files[0]) parseCSV(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files[0]) parseUploadedFile(e.dataTransfer.files[0]);
 });
 csvFileInput.addEventListener('change', (e) => {
-    if (e.target.files[0]) parseCSV(e.target.files[0]);
+    if (e.target.files[0]) parseUploadedFile(e.target.files[0]);
 });
 
-function parseCSV(file) {
+function parseUploadedFile(file) {
     csvZone.querySelector('p').innerHTML = `<strong>${file.name}</strong> chargé`;
+
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    const isExcel = ext === 'xlsx' || ext === 'xls';
+
     const reader = new FileReader();
     reader.onload = function (e) {
-        const bytes = new Uint8Array(e.target.result);
-        let text;
         try {
-            // Essai UTF-8 strict — échoue sur Windows-1252
-            text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-        } catch {
-            // Fallback vers windows-1252 (export Excel FR classique)
-            text = new TextDecoder('windows-1252').decode(bytes);
+            const bytes = new Uint8Array(e.target.result);
+
+            if (isExcel) {
+                if (typeof XLSX === 'undefined') {
+                    alert('Le lecteur Excel n\'est pas disponible. Merci de recharger la page.');
+                    return;
+                }
+                const workbook = XLSX.read(bytes, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(firstSheet, {
+                    header: 1,
+                    raw: false,
+                    defval: ''
+                });
+                processRows(rows, file.name);
+                return;
+            }
+
+            let text;
+            try {
+                // Essai UTF-8 strict — échoue sur Windows-1252
+                text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+            } catch {
+                // Fallback vers windows-1252 (export Excel FR classique)
+                text = new TextDecoder('windows-1252').decode(bytes);
+            }
+            processCSVText(text, file.name);
+        } catch (err) {
+            console.error('[IMPORT] erreur de lecture:', err);
+            alert('Impossible de lire le fichier. Vérifiez le format (CSV, XLSX, XLS).');
         }
-        processCSVText(text);
     };
     reader.readAsArrayBuffer(file);
+}
+
+function normalizeHeaderLabel(value) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '');
+}
+
+function normalizeCellValue(value) {
+    return String(value == null ? '' : value).trim();
+}
+
+function getImportModalElements() {
+    return {
+        overlay: document.getElementById('import-mapping-modal'),
+        title: document.getElementById('import-mapping-title'),
+        intro: document.getElementById('import-mapping-intro'),
+        headerRowSelect: document.getElementById('import-mapping-header-row'),
+        selectPrenom: document.getElementById('import-col-prenom'),
+        selectNom: document.getElementById('import-col-nom'),
+        selectEcole: document.getElementById('import-col-ecole'),
+        selectContrainte: document.getElementById('import-col-contrainte'),
+        previewHead: document.getElementById('import-preview-head'),
+        previewBody: document.getElementById('import-preview-body'),
+        summary: document.getElementById('import-mapping-summary'),
+        manualWrap: document.getElementById('import-mapping-manual'),
+        editToggleBtn: document.getElementById('import-mapping-edit-toggle'),
+        cancelBtn: document.getElementById('import-mapping-cancel'),
+        confirmBtn: document.getElementById('import-mapping-confirm')
+    };
+}
+
+function describeColumn(rows, columnIndex) {
+    const values = rows
+        .slice(0, 5)
+        .map(row => normalizeCellValue(row[columnIndex] || ''))
+        .filter(Boolean)
+        .slice(0, 3);
+
+    return values.length ? values.join(' | ') : 'colonne vide';
+}
+
+function getColumnStats(colValues) {
+    const nonEmpty = colValues.filter(Boolean);
+    const sampleSize = Math.max(nonEmpty.length, 1);
+    const uniqueCount = new Set(nonEmpty.map(v => v.toLowerCase())).size;
+    const averageLength = nonEmpty.length
+        ? nonEmpty.reduce((sum, value) => sum + value.length, 0) / nonEmpty.length
+        : 0;
+    const blankRatio = colValues.length ? (colValues.length - nonEmpty.length) / colValues.length : 1;
+    const uniqueRatio = nonEmpty.length ? uniqueCount / nonEmpty.length : 1;
+
+    return { nonEmpty, sampleSize, uniqueCount, averageLength, blankRatio, uniqueRatio };
+}
+
+function hasHeaderLikeTokens(row) {
+    if (!Array.isArray(row) || !row.length) return false;
+    const normalizedCells = row.map(normalizeHeaderLabel).filter(Boolean);
+    if (!normalizedCells.length) return false;
+
+    const headerWords = /(prenom|nom|ecole|etablissement|school|demande|contrainte|commentaire|remarque|observations)/;
+    const matchingCells = normalizedCells.filter(cell => headerWords.test(cell)).length;
+    const shortCells = normalizedCells.filter(cell => cell.length <= 24).length;
+
+    // Un en-tête est souvent composé de cellules courtes contenant des mots-clés métier.
+    return matchingCells >= 2 && shortCells >= Math.ceil(normalizedCells.length * 0.6);
+}
+
+function getHeaderCandidateScore(row) {
+    if (!Array.isArray(row) || !row.length) return -1;
+
+    const normalizedCells = row.map(normalizeHeaderLabel).filter(Boolean);
+    if (!normalizedCells.length) return -1;
+
+    const headerWords = /(prenom|nom|ecole|etablissement|school|demande|contrainte|commentaire|remarque|observations|origine|privee|prive|publique|public)/;
+    const matchingCells = normalizedCells.filter(cell => headerWords.test(cell)).length;
+    const shortCells = normalizedCells.filter(cell => cell.length <= 24).length;
+    const nonEmptyCount = normalizedCells.length;
+
+    let score = matchingCells * 4 + shortCells;
+
+    if (nonEmptyCount === 1) score -= 6;
+    if (matchingCells >= 3) score += 6;
+    if (normalizedCells.some(cell => cell.includes('demandeparticuliere'))) score += 4;
+    if (normalizedCells.some(cell => cell.includes('ecoledorigine') || cell.includes('ecole'))) score += 3;
+
+    return score;
+}
+
+function isLikelyDataRow(row) {
+    if (!Array.isArray(row) || !row.length) return false;
+
+    const cells = row.map(normalizeCellValue);
+    const nonEmpty = cells.filter(Boolean);
+    if (!nonEmpty.length) return false;
+
+    const looksLikeName = (txt) => /^[A-Za-zÀ-ÖØ-öø-ÿ' -]{2,}$/.test(txt || '');
+    const prenomLike = looksLikeName(cells[0] || '') || looksLikeName(cells[1] || '');
+    const nomLike = looksLikeName(cells[1] || '') || looksLikeName(cells[0] || '');
+
+    const hasConstraintSentence = cells.some(v =>
+        /(pas\s+avec|avec\s+|separer|séparer|demande|contrainte)/i.test(v)
+    );
+
+    return prenomLike && nomLike && (nonEmpty.length >= 2 || hasConstraintSentence);
+}
+
+function getColumnRoleScores(cleanRows, headerRowIndex) {
+    const header = headerRowIndex === 0 ? cleanRows[0] : [];
+    const dataRows = cleanRows.slice(headerRowIndex === 0 ? 1 : 0, headerRowIndex === 0 ? 41 : 40);
+    const maxCols = cleanRows.reduce((m, r) => Math.max(m, r.length), 0);
+
+    const headerAliases = {
+        prenom: ['prenom', 'firstname', 'givenname', 'forename'],
+        nom: ['nom', 'lastname', 'surname', 'familyname', 'nomdefamille'],
+        ecole: ['ecole', 'etablissement', 'school', 'origine', 'provenance'],
+        contrainte: ['contrainte', 'contraintes', 'demande', 'demandeparticuliere', 'commentaire', 'remarque', 'observations']
+    };
+
+    const hasSchoolWord = value => /ecole|école|college|collège|lycee|lycée|school|saint|st[\s.-]/i.test(value);
+    const hasConstraintWord = value => /pas\s+avec|avec\s+|separer|séparer|demande|contraint|remarque|commentaire|\//i.test(value);
+    const looksLikeSingleName = value => /^[A-Za-zÀ-ÖØ-öø-ÿ' -]{2,24}$/.test(value) && value.trim().split(/\s+/).length <= 2;
+    const looksLikeSchoolLabel = value => /^[A-Za-zÀ-ÖØ-öø-ÿ' -]{3,40}$/.test(value) && value.trim().split(/\s+/).length >= 1;
+
+    const scores = {
+        prenom: {},
+        nom: {},
+        ecole: {},
+        contrainte: {}
+    };
+
+    for (let c = 0; c < maxCols; c++) {
+        const h = normalizeHeaderLabel(header[c] || '');
+        const rawValues = dataRows.map(r => normalizeCellValue(r[c] || ''));
+        const { nonEmpty: colValues, sampleSize, averageLength, blankRatio, uniqueRatio } = getColumnStats(rawValues);
+
+        const headerScore = aliases => aliases.some(alias => h.includes(alias)) ? 16 : 0;
+        const prenomHits = colValues.filter(v => {
+            const key = normalizeGenderKey(v);
+            return NORMALIZED_GENDER_NAME_DICTIONARY.il.has(key) || NORMALIZED_GENDER_NAME_DICTIONARY.elle.has(key);
+        }).length;
+        const nameHits = colValues.filter(looksLikeSingleName).length;
+        const upperHits = colValues.filter(v => {
+            const compact = v.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/g, '').trim();
+            return compact && compact === compact.toUpperCase();
+        }).length;
+        const schoolHits = colValues.filter(hasSchoolWord).length;
+        const constraintHits = colValues.filter(hasConstraintWord).length;
+        const longTextHits = colValues.filter(v => v.length > 18 || /[,;]/.test(v)).length;
+        const schoolLabelHits = colValues.filter(looksLikeSchoolLabel).length;
+        const repeatedValuesBonus = uniqueRatio <= 0.65 ? 4 : uniqueRatio <= 0.8 ? 2 : 0;
+        const optionalTextBonus = blankRatio >= 0.25 ? 2 : blankRatio >= 0.1 ? 1 : 0;
+
+        scores.prenom[c] = headerScore(headerAliases.prenom)
+            + (prenomHits / sampleSize) * 6
+            + (nameHits / sampleSize) * 2
+            - (longTextHits / sampleSize) * 2
+            - (schoolHits / sampleSize) * 3
+            - optionalTextBonus;
+
+        scores.nom[c] = headerScore(headerAliases.nom)
+            + (upperHits / sampleSize) * 6
+            + (nameHits / sampleSize) * 2
+            - (longTextHits / sampleSize) * 2
+            - (schoolHits / sampleSize) * 2
+            - optionalTextBonus;
+
+        scores.ecole[c] = headerScore(headerAliases.ecole)
+            + (schoolHits / sampleSize) * 6
+            + repeatedValuesBonus
+            + (schoolLabelHits / sampleSize) * 2.5
+            + (averageLength >= 4 && averageLength <= 22 ? 2 : 0)
+            - (constraintHits / sampleSize) * 3
+            - (blankRatio > 0.55 ? 3 : 0)
+            - (longTextHits / sampleSize) * 1.5;
+
+        scores.contrainte[c] = headerScore(headerAliases.contrainte)
+            + (constraintHits / sampleSize) * 7
+            + (longTextHits / sampleSize) * 2
+            + optionalTextBonus
+            + (averageLength >= 12 ? 2 : 0)
+            - (schoolHits / sampleSize) * 2
+            - (uniqueRatio <= 0.45 ? 1.5 : 0);
+    }
+
+    return scores;
+}
+
+function scoreMapping(cleanRows, mapping, headerRowIndex, scores) {
+    const dataRows = cleanRows.slice(headerRowIndex === 0 ? 1 : 0, headerRowIndex === 0 ? 26 : 25);
+    let score = 0;
+
+    score += (scores.prenom[mapping.prenom] || 0);
+    score += (scores.nom[mapping.nom] || 0);
+    score += (scores.ecole[mapping.ecole] || 0);
+    score += (scores.contrainte[mapping.contrainte] || 0);
+
+    dataRows.forEach(row => {
+        const prenom = normalizeCellValue(row[mapping.prenom] || '');
+        const nom = normalizeCellValue(row[mapping.nom] || '');
+        const ecole = normalizeCellValue(row[mapping.ecole] || '');
+        const contrainte = normalizeCellValue(row[mapping.contrainte] || '');
+
+        if (prenom && nom) score += 1.8;
+        if (prenom && /^[A-Za-zÀ-ÖØ-öø-ÿ' -]{2,24}$/.test(prenom)) score += 0.8;
+        if (nom && /^[A-Za-zÀ-ÖØ-öø-ÿ' -]{2,32}$/.test(nom)) score += 0.8;
+        if (nom && nom === nom.toUpperCase()) score += 0.5;
+        if (ecole && !/(pas\s+avec|avec\s+|separer|séparer)/i.test(ecole)) score += 0.5;
+        if (contrainte && /pas\s+avec|avec\s+|separer|séparer|contraint/i.test(contrainte)) score += 1.1;
+        if (contrainte && contrainte.length > 12) score += 0.4;
+
+        if (prenom && /(ecole|école|college|collège|lycee|lycée)/i.test(prenom)) score -= 2;
+        if (nom && /(ecole|école|college|collège|lycee|lycée)/i.test(nom)) score -= 2;
+        if (ecole && /pas\s+avec|avec\s+|separer|séparer/.test(ecole)) score -= 2.5;
+        if (contrainte && contrainte === contrainte.toUpperCase() && contrainte.split(/\s+/).length <= 2) score -= 1;
+    });
+
+    return score;
+}
+
+function pickBestIndex(scoresByIndex, usedIndices = new Set(), minScore = 0.01) {
+    let bestIndex = -1;
+    let bestScore = minScore;
+
+    Object.entries(scoresByIndex).forEach(([idxStr, score]) => {
+        const idx = parseInt(idxStr, 10);
+        if (usedIndices.has(idx)) return;
+        if (score > bestScore) {
+            bestScore = score;
+            bestIndex = idx;
+        }
+    });
+
+    return bestIndex;
+}
+
+function detectColumns(rows) {
+    const cleanRows = rows
+        .filter(r => Array.isArray(r))
+        .map(r => r.map(normalizeCellValue))
+        .filter(r => r.some(cell => cell !== ''));
+
+    if (!cleanRows.length) {
+        return {
+            detected: { prenom: 1, nom: 0, ecole: 3, contrainte: 5 },
+            headerRowIndex: 1,
+            dataStartIndex: 2
+        };
+    }
+
+    let headerRowIndex = -1;
+    let bestHeaderScore = -1;
+
+    cleanRows.slice(0, 4).forEach((row, idx) => {
+        if (isLikelyDataRow(row)) return;
+        const score = getHeaderCandidateScore(row);
+        if (score > bestHeaderScore && score >= 8) {
+            bestHeaderScore = score;
+            headerRowIndex = idx;
+        }
+    });
+
+    // Par défaut: en-têtes à ligne 2 (index 1), données à ligne 3 (index 2)
+    if (headerRowIndex === -1) {
+        headerRowIndex = 1;
+    }
+
+    const dataStartIndex = headerRowIndex + 1;
+    const maxCols = cleanRows.reduce((m, r) => Math.max(m, r.length), 0);
+    const scores = getColumnRoleScores(cleanRows, headerRowIndex);
+
+    let bestScore = Number.NEGATIVE_INFINITY;
+    let bestMapping = null;
+
+    for (let prenom = 0; prenom < maxCols; prenom++) {
+        for (let nom = 0; nom < maxCols; nom++) {
+            if (nom === prenom) continue;
+            for (let ecole = 0; ecole < maxCols; ecole++) {
+                if (ecole === prenom || ecole === nom) continue;
+                for (let contrainte = 0; contrainte < maxCols; contrainte++) {
+                    if (contrainte === prenom || contrainte === nom || contrainte === ecole) continue;
+
+                    const mapping = { prenom, nom, ecole, contrainte };
+                    const score = scoreMapping(cleanRows, mapping, headerRowIndex, scores);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMapping = mapping;
+                    }
+                }
+            }
+        }
+    }
+
+    if (!bestMapping) {
+        bestMapping = { prenom: 1, nom: 0, ecole: 3, contrainte: 5 };
+    }
+
+    return {
+        detected: bestMapping,
+        headerRowIndex,
+        dataStartIndex
+    };
+}
+
+function populateImportPreview(rows, hasHeader) {
+    const { previewHead, previewBody } = getImportModalElements();
+    if (!previewHead || !previewBody) return;
+
+    const cleanRows = rows
+        .filter(r => Array.isArray(r))
+        .map(r => r.map(normalizeCellValue))
+        .filter(r => r.some(cell => cell !== ''));
+
+    const maxCols = cleanRows.reduce((m, r) => Math.max(m, r.length), 0);
+    const headerRowIndex = hasHeader;
+    const startIndex = headerRowIndex >= 0 ? headerRowIndex + 1 : 0;
+    const headRow = headerRowIndex >= 0 ? cleanRows[headerRowIndex] || [] : [];
+    const previewRows = cleanRows.slice(startIndex);
+    const mapping = getCurrentImportMapping();
+    const columnRoleByIndex = new Map([
+        [mapping.prenom, 'prenom'],
+        [mapping.nom, 'nom'],
+        [mapping.ecole, 'ecole'],
+        [mapping.contrainte, 'contrainte']
+    ]);
+
+    previewHead.innerHTML = `<tr>${Array.from({ length: maxCols }, (_, idx) => {
+        const title = hasHeader && headRow[idx] ? escapeHtml(headRow[idx]) : `Colonne ${idx + 1}`;
+        const role = columnRoleByIndex.get(idx);
+        const cls = role ? `import-col-${role}` : '';
+        return `<th class="${cls}">${title}</th>`;
+    }).join('')}</tr>`;
+
+    previewBody.innerHTML = previewRows.map(row => `
+        <tr>${Array.from({ length: maxCols }, (_, idx) => {
+            const role = columnRoleByIndex.get(idx);
+            const cls = role ? `import-col-${role}` : '';
+            return `<td class="${cls}">${escapeHtml(row[idx] || '')}</td>`;
+        }).join('')}</tr>
+    `).join('');
+}
+
+function getCurrentImportMapping() {
+    const els = getImportModalElements();
+    return {
+        prenom: parseInt(els.selectPrenom?.value || '-1', 10),
+        nom: parseInt(els.selectNom?.value || '-1', 10),
+        ecole: parseInt(els.selectEcole?.value || '-1', 10),
+        contrainte: parseInt(els.selectContrainte?.value || '-1', 10)
+    };
+}
+
+function updateImportMappingSummary(rows) {
+    const els = getImportModalElements();
+    if (!els.summary) return;
+
+    const mapping = getCurrentImportMapping();
+    const roles = [
+        ['Prénom', mapping.prenom],
+        ['Nom', mapping.nom],
+        ['École', mapping.ecole],
+        ['Contraintes', mapping.contrainte]
+    ];
+
+    els.summary.innerHTML = roles.map(([label, idx]) => {
+        const desc = idx >= 0 ? describeColumn(rows, idx) : 'non sélectionnée';
+        return `<div class="import-mapping-chip"><strong>${label}</strong><span>Colonne ${idx + 1} · ${escapeHtml(desc)}</span></div>`;
+    }).join('');
+}
+
+function buildImportColumnOptions(rows) {
+    const cleanRows = rows
+        .filter(r => Array.isArray(r))
+        .map(r => r.map(normalizeCellValue))
+        .filter(r => r.some(cell => cell !== ''));
+    const maxCols = cleanRows.reduce((m, r) => Math.max(m, r.length), 0);
+
+    return Array.from({ length: maxCols }, (_, idx) => {
+        const desc = describeColumn(cleanRows, idx);
+        return `<option value="${idx}">Colonne ${idx + 1} · ${escapeHtml(desc)}</option>`;
+    }).join('');
+}
+
+function closeImportMappingModal() {
+    const { overlay } = getImportModalElements();
+    if (overlay) overlay.classList.add('hidden');
+}
+
+function bindImportMappingModalEvents(isAdvancedMode) {
+    let els = getImportModalElements();
+    if (!els.overlay) return;
+    
+    // Unbind previous events to avoid duplicates
+    if (els.overlay.dataset.bound === '1') {
+        const cloneOverlay = els.overlay.cloneNode(true);
+        els.overlay.parentNode.replaceChild(cloneOverlay, els.overlay);
+        els = getImportModalElements(); // Reobtain elements after cloning
+    }
+
+    const refresh = () => {
+        const headerRowIndex = parseInt(els.headerRowSelect?.value || '-1', 10);
+        populateImportPreview(currentImportPreviewRows, Number.isNaN(headerRowIndex) ? -1 : headerRowIndex);
+        updateImportMappingSummary(currentImportPreviewRows);
+    };
+
+    [els.selectPrenom, els.selectNom, els.selectEcole, els.selectContrainte].forEach(select => {
+        select?.addEventListener('change', refresh);
+    });
+    els.headerRowSelect?.addEventListener('change', refresh);
+    
+    els.editToggleBtn?.addEventListener('click', () => {
+        if (isAdvancedMode) {
+            // Return to simple mode
+            importModalIsAdvancedMode = false;
+            displayImportModal(currentImportPreviewRows);
+        } else {
+            // Go to advanced mode
+            importModalIsAdvancedMode = true;
+            displayImportModal(currentImportPreviewRows);
+        }
+    });
+
+    els.cancelBtn?.addEventListener('click', () => {
+        closeImportMappingModal();
+        if (pendingImportModalResolver) {
+            pendingImportModalResolver(null);
+            pendingImportModalResolver = null;
+        }
+    });
+
+    els.confirmBtn?.addEventListener('click', () => {
+        const mapping = {
+            prenom: parseInt(els.selectPrenom?.value || '-1', 10),
+            nom: parseInt(els.selectNom?.value || '-1', 10),
+            ecole: parseInt(els.selectEcole?.value || '-1', 10),
+            contrainte: parseInt(els.selectContrainte?.value || '-1', 10),
+            headerRowIndex: parseInt(els.headerRowSelect?.value || '-1', 10)
+        };
+
+        console.log('[VALIDATION] Valeurs de sélection:', mapping);
+        console.log('[VALIDATION] selectPrenom value:', els.selectPrenom?.value);
+        console.log('[VALIDATION] selectNom value:', els.selectNom?.value);
+
+        const values = [mapping.prenom, mapping.nom, mapping.ecole, mapping.contrainte];
+        if (values.some(v => Number.isNaN(v) || v < 0)) {
+            console.log('[VALIDATION] Erreur - au moins une valeur est NaN ou < 0:', values);
+            alert('Merci de sélectionner les 4 colonnes.');
+            return;
+        }
+        if (new Set(values).size !== values.length) {
+            console.log('[VALIDATION] Erreur - colonnes dupliquées:', values);
+            alert('Chaque rôle doit pointer vers une colonne différente.');
+            return;
+        }
+
+        console.log('[VALIDATION] Succès - mapping validé');
+        closeImportMappingModal();
+        if (pendingImportModalResolver) {
+            pendingImportModalResolver(mapping);
+            pendingImportModalResolver = null;
+        }
+    });
+
+    els.overlay.addEventListener('click', (event) => {
+        if (event.target === els.overlay) {
+            closeImportMappingModal();
+            if (pendingImportModalResolver) {
+                pendingImportModalResolver(null);
+                pendingImportModalResolver = null;
+            }
+        }
+    });
+
+    els.overlay.dataset.bound = '1';
+}
+
+function askUserToConfirmColumns(fileName, detection, rows) {
+    const cleanRows = rows
+        .filter(r => Array.isArray(r))
+        .map(r => r.map(normalizeCellValue))
+        .filter(r => r.some(cell => cell !== ''));
+    const els = getImportModalElements();
+
+    if (!els.overlay) {
+        return Promise.resolve({
+            ...detection.detected,
+            headerRowIndex: detection.headerRowIndex
+        });
+    }
+
+    currentImportFileName = fileName;
+    currentImportDetection = detection;
+    currentImportPreviewRows = cleanRows;
+    currentImportDetectedHeaderRowIndex = detection.headerRowIndex;
+    importModalIsAdvancedMode = false;
+    displayImportModal(cleanRows);
+
+    return new Promise(resolve => {
+        pendingImportModalResolver = resolve;
+    });
+}
+
+function displayImportModal(rows) {
+    const els = getImportModalElements();
+    const detection = currentImportDetection;
+    const fileName = currentImportFileName;
+    const isAdvanced = importModalIsAdvancedMode;
+    
+    if (isAdvanced) {
+        displayImportAdvancedModal(rows, detection, fileName);
+    } else {
+        displayImportSimpleModal(rows, detection, fileName);
+    }
+}
+
+function displayImportSimpleModal(rows, detection, fileName) {
+    const els = getImportModalElements();
+    
+    // Nettoyer les rangées
+    const cleanRows = rows
+        .filter(r => Array.isArray(r))
+        .map(r => r.map(normalizeCellValue))
+        .filter(r => r.some(cell => cell !== ''));
+    
+    // Masquer tous les éléments avancés
+    if (els.headerRowSelect?.parentElement) els.headerRowSelect.parentElement.style.display = 'none';
+    if (els.summary) els.summary.style.display = 'none';
+    if (els.manualWrap) els.manualWrap.classList.add('hidden');
+    if (els.title) els.title.textContent = 'Importer la liste des élèves';
+    if (els.intro) els.intro.textContent = `${fileName} - Voici un aperçu des données.`;
+    if (els.editToggleBtn) els.editToggleBtn.textContent = 'Configurer';
+    
+    // Construire les options des sélecteurs (nécessaire pour la validation)
+    const optionsHtml = buildImportColumnOptions(cleanRows);
+    els.selectPrenom.innerHTML = optionsHtml;
+    els.selectNom.innerHTML = optionsHtml;
+    els.selectEcole.innerHTML = optionsHtml;
+    els.selectContrainte.innerHTML = optionsHtml;
+
+    const headerRowOptions = ['<option value="1">Ligne 2 · en-têtes</option>']
+        .concat(cleanRows.slice(0, 4).map((row, idx) => {
+            const label = describeColumn(cleanRows, idx) || `Ligne ${idx + 1}`;
+            return `<option value="${idx}">Ligne ${idx + 1} · ${escapeHtml(label)}</option>`;
+        }))
+        .join('');
+    els.headerRowSelect.innerHTML = headerRowOptions;
+    
+    // Définir les valeurs des sélecteurs avec les colonnes détectées
+    if (els.selectPrenom) els.selectPrenom.value = String(detection.detected.prenom);
+    if (els.selectNom) els.selectNom.value = String(detection.detected.nom);
+    if (els.selectEcole) els.selectEcole.value = '3';
+    if (els.selectContrainte) els.selectContrainte.value = '5';
+    if (els.headerRowSelect) els.headerRowSelect.value = String(detection.headerRowIndex >= 0 ? detection.headerRowIndex : 1);
+    
+    console.log('[SIMPLE MODAL] Valeurs définies:', {
+        prenom: els.selectPrenom.value,
+        nom: els.selectNom.value,
+        ecole: els.selectEcole.value,
+        contrainte: els.selectContrainte.value
+    });
+    
+    // Afficher une preview simple avec les en-têtes et 4 données
+    const previewHead = document.getElementById('import-preview-head');
+    const previewBody = document.getElementById('import-preview-body');
+    
+    if (previewHead && previewBody) {
+        const headerRowIndex = detection.headerRowIndex;
+        const dataStartIndex = headerRowIndex + 1;
+        
+        const headerRow = cleanRows[headerRowIndex] || [];
+        const previewRows = cleanRows.slice(dataStartIndex);
+        const maxCols = cleanRows.reduce((m, r) => Math.max(m, (r || []).length), 0);
+        
+        // En-tête: afficher les noms de colonnes de la ligne 2
+        previewHead.innerHTML = `<tr>${Array.from({ length: maxCols }, (_, idx) => {
+            const title = headerRow?.[idx] ? escapeHtml(headerRow[idx]) : `Col ${idx + 1}`;
+            return `<th>${title}</th>`;
+        }).join('')}</tr>`;
+        
+        // Toutes les lignes de données (ligne 3+)
+        previewBody.innerHTML = previewRows.map(row => `
+            <tr>${Array.from({ length: maxCols }, (_, idx) => {
+                return `<td>${escapeHtml(row?.[idx] || '')}</td>`;
+            }).join('')}</tr>
+        `).join('');
+    }
+    
+    bindImportMappingModalEvents(false);
+    els.overlay.classList.remove('hidden');
+}
+
+function displayImportAdvancedModal(rows, detection, fileName) {
+    const els = getImportModalElements();
+    
+    // Afficher les éléments avancés
+    if (els.headerRowSelect?.parentElement) els.headerRowSelect.parentElement.style.display = 'block';
+    if (els.summary) els.summary.style.display = 'block';
+    if (els.manualWrap) els.manualWrap.classList.remove('hidden');
+    if (els.title) els.title.textContent = 'Configurations avancées';
+    if (els.intro) els.intro.textContent = `Ajustez les colonnes détectées pour ${fileName}.`;
+    if (els.editToggleBtn) els.editToggleBtn.textContent = 'Retour';
+    
+    const optionsHtml = buildImportColumnOptions(rows);
+    const headerRowOptions = ['<option value="-1">Aucune ligne d\'intitulés</option>']
+        .concat(rows.slice(0, 4).map((row, idx) => {
+            const label = describeColumn(rows, idx) || `Ligne ${idx + 1}`;
+            return `<option value="${idx}">Ligne ${idx + 1} · ${escapeHtml(label)}</option>`;
+        }))
+        .join('');
+    
+    els.headerRowSelect.innerHTML = headerRowOptions;
+    els.selectPrenom.innerHTML = optionsHtml;
+    els.selectNom.innerHTML = optionsHtml;
+    els.selectEcole.innerHTML = optionsHtml;
+    els.selectContrainte.innerHTML = optionsHtml;
+    
+    // Rétablir les valeurs détectées
+    els.headerRowSelect.value = String(detection.headerRowIndex);
+    els.selectPrenom.value = String(detection.detected.prenom);
+    els.selectNom.value = String(detection.detected.nom);
+    els.selectEcole.value = String(detection.detected.ecole);
+    els.selectContrainte.value = String(detection.detected.contrainte);
+    
+    populateImportPreview(rows, detection.headerRowIndex);
+    updateImportMappingSummary(rows);
+    bindImportMappingModalEvents(true);
+    els.overlay.classList.remove('hidden');
 }
 
 function parseNamesList(segment) {
@@ -752,21 +1413,86 @@ function parseDemandeParticuliere(raw) {
     };
 }
 
-function processCSVText(text) {
+function processCSVText(text, fileName = 'CSV') {
     const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
 
-    // Ignorer la ligne d'en-tête si présente
-    let start = 0;
-    if (lines.length > 0 && /prénom|prenom|nom|name|élève|eleve/i.test(lines[0])) start = 1;
+    const parseDelimitedLine = (line, separator) => {
+        const cols = [];
+        let current = '';
+        let inQuotes = false;
 
-    students = lines.slice(start).map(l => {
-        // Accepte ; ou , comme séparateur
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"';
+                    i += 1;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+                continue;
+            }
+
+            if (ch === separator && !inQuotes) {
+                cols.push(current.trim());
+                current = '';
+                continue;
+            }
+
+            current += ch;
+        }
+
+        cols.push(current.trim());
+        return cols;
+    };
+
+    const rows = lines.map(l => {
         const sep = l.includes(';') ? ';' : ',';
-        const cols = l.split(sep).map(c => c.replace(/"/g, '').trim());
-        const nom = cols[0] || '';
-        const prenom = cols[1] || '';
-        const ecole = normalizeSchoolName(cols[2] || '');
-        const demande_raw = cols[3] || '';
+        return parseDelimitedLine(l, sep).map(c => c.replace(/^"|"$/g, '').trim());
+    });
+    return processRows(rows, fileName);
+}
+
+async function processRows(rows, fileName = 'fichier') {
+    const detection = detectColumns(rows);
+    const selectedColumns = await askUserToConfirmColumns(fileName, detection, rows);
+    if (!selectedColumns) {
+        return;
+    }
+
+    const cleanRows = rows
+        .filter(r => Array.isArray(r))
+        .map(r => r.map(normalizeCellValue))
+        .filter(r => r.some(cell => cell !== ''));
+
+    // Par défaut: ligne 2 pour les en-têtes, ligne 3 pour les données
+    const headerRowIndex = selectedColumns.headerRowIndex >= 0 ? selectedColumns.headerRowIndex : 1;
+    const dataStartIndex = headerRowIndex + 1;
+
+    console.log('[IMPORT] Configuration:', {
+        headerRowIndex: headerRowIndex,
+        dataStartIndex: dataStartIndex,
+        prenom: selectedColumns.prenom,
+        nom: selectedColumns.nom,
+        ecole: selectedColumns.ecole,
+        contrainte: selectedColumns.contrainte,
+        totalRows: cleanRows.length,
+        dataRows: Math.max(0, cleanRows.length - dataStartIndex)
+    });
+
+    if (dataStartIndex < cleanRows.length) {
+        console.log('[IMPORT] Première rangée de données:', cleanRows[dataStartIndex]);
+    }
+
+    students = cleanRows.slice(dataStartIndex).map((cols, idx) => {
+        const prenom = cols[selectedColumns.prenom] || '';
+        const nom = cols[selectedColumns.nom] || '';
+        const ecole = normalizeSchoolName(cols[selectedColumns.ecole] || '');
+        const demande_raw = cols[selectedColumns.contrainte] || '';
+
+        if (idx < 2) {
+            console.log(`[IMPORT] Élève ${idx + 1}:`, { prenom, nom, ecole, demande_raw });
+        }
 
         if (!prenom && !nom) return null;
 
@@ -792,8 +1518,8 @@ function processCSVText(text) {
 
     normalizeStudentConstraintsReferences();
 
-    console.log('[CSV] élèves chargés:', students.length);
-    console.log('[CSV] exemple contraintes:', students.slice(0, 5).map(s => ({
+    console.log('[IMPORT] élèves chargés:', students.length);
+    console.log('[IMPORT] exemple contraintes:', students.slice(0, 5).map(s => ({
         eleve: s.fullName,
         genre: s.genre,
         genre_source: s.genre_source,
@@ -1502,7 +2228,7 @@ function renderMixityPopover(ilCount, elleCount, rate) {
     `;
 }
 
-function renderSchoolPopover(minVal, maxVal, schoolBreakdown) {
+function renderSchoolPopover(schoolBreakdown) {
     const schoolLines = (schoolBreakdown || []).map(item => {
         const names = (item.students || []).join(', ');
         const namesPart = names ? `<div class="popover-school-students">${escapeHtml(names)}</div>` : '';
@@ -1525,10 +2251,6 @@ function renderSchoolPopover(minVal, maxVal, schoolBreakdown) {
         <div class="class-indicator-popover" role="tooltip">
             <button type="button" class="popover-close" aria-label="Fermer">×</button>
             <div class="popover-title">Répartition par école</div>
-            <div class="popover-inline-grid">
-                <div class="popover-kpi"><span>Min (hors écoles uniques)</span><strong>${minVal === null ? 'n/a' : minVal}</strong></div>
-                <div class="popover-kpi"><span>Max</span><strong>${maxVal}</strong></div>
-            </div>
             <ul class="popover-list popover-school-list">${schoolLines || '<li class="popover-empty">Aucune école renseignée</li>'}</ul>
         </div>
     `;
@@ -1685,7 +2407,7 @@ function buildResultsIndicators(repartition) {
                     <button type="button" class="class-indicator-help" aria-label="Détail écoles">i</button>
                     <span class="class-indicator-label">Même école min</span>
                     <span class="class-indicator-value">${ind.school.value_display}</span>
-                    ${renderSchoolPopover(ind.school.value, ind.school.max_value, ind.school.breakdown)}
+                    ${renderSchoolPopover(ind.school.breakdown)}
                 </div>
                 <div class="class-indicator-item has-popover status-${ind.special.status}">
                     <button type="button" class="class-indicator-help" aria-label="Détail contraintes spéciales">i</button>

@@ -86,22 +86,22 @@
             <p class="wizard-error hidden" id="error-2">Veuillez choisir un nombre de classes.</p>
         </div>
 
-        <!-- Étape 3 : Import CSV -->
+        <!-- Étape 3 : Import élèves -->
         <div class="wizard-panel" id="panel-3">
             <h2 class="wizard-panel-title">Importez la liste des élèves</h2>
-            <p class="wizard-panel-hint">Fichier CSV avec 4 colonnes : <strong>Nom de famille</strong>, <strong>Prénom</strong>, <strong>École d'origine</strong>, <strong>Demande particulière</strong> — une ligne par élève.</p>
+            <p class="wizard-panel-hint">Fichier CSV / Excel (.csv, .xlsx, .xls). Les colonnes sont détectées automatiquement puis confirmées (prénom, nom, école, contraintes).</p>
             <div class="csv-zone" id="csv-zone">
-                <input type="file" id="csv-file" accept=".csv" class="csv-file-input">
+                <input type="file" id="csv-file" accept=".csv,.xlsx,.xls" class="csv-file-input">
                 <div class="csv-zone-label">
                     <span class="csv-zone-icon">📄</span>
-                    <p>Glisser-déposer un fichier CSV<br>ou <strong>cliquer pour choisir</strong></p>
+                    <p>Glisser-déposer un fichier CSV ou Excel<br>ou <strong>cliquer pour choisir</strong></p>
                 </div>
             </div>
             <div id="students-preview-container" class="hidden">
                 <p class="students-count" id="students-count"></p>
                 <ul class="students-preview" id="students-preview"></ul>
             </div>
-            <p class="wizard-error hidden" id="error-3">Veuillez importer un fichier CSV avec au moins un élève.</p>
+            <p class="wizard-error hidden" id="error-3">Veuillez importer un fichier CSV ou Excel avec au moins un élève.</p>
         </div>
 
         <!-- Étape 4 : Contraintes de placement -->
@@ -228,6 +228,64 @@
         </div>
     </div>
 
+    <div id="import-mapping-modal" class="import-mapping-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="import-mapping-title">
+        <div class="import-mapping-card">
+            <div class="import-mapping-header">
+                <div>
+                    <p class="import-mapping-kicker">Import intelligent</p>
+                    <h3 class="import-mapping-title" id="import-mapping-title">Vérifier les colonnes importées</h3>
+                </div>
+                <label class="import-mapping-header-toggle import-mapping-header-select">
+                    <span>Ligne des intitulés</span>
+                    <select id="import-mapping-header-row"></select>
+                </label>
+            </div>
+
+            <p class="import-mapping-intro" id="import-mapping-intro"></p>
+
+            <div class="import-mapping-summary" id="import-mapping-summary"></div>
+
+            <div class="import-mapping-quick-actions">
+                <button type="button" class="wizard-btn secondary" id="import-mapping-edit-toggle">Ajuster manuellement</button>
+            </div>
+
+            <div class="import-mapping-manual hidden" id="import-mapping-manual">
+                <div class="import-mapping-manual-title">Réglages avancés</div>
+                <div class="import-mapping-grid">
+                <label class="import-mapping-field">
+                    <span>Prénom</span>
+                    <select id="import-col-prenom"></select>
+                </label>
+                <label class="import-mapping-field">
+                    <span>Nom</span>
+                    <select id="import-col-nom"></select>
+                </label>
+                <label class="import-mapping-field">
+                    <span>École</span>
+                    <select id="import-col-ecole"></select>
+                </label>
+                <label class="import-mapping-field">
+                    <span>Contraintes</span>
+                    <select id="import-col-contrainte"></select>
+                </label>
+                </div>
+            </div>
+
+            <div class="import-preview-wrap">
+                <table class="import-preview-table">
+                    <thead id="import-preview-head"></thead>
+                    <tbody id="import-preview-body"></tbody>
+                </table>
+            </div>
+
+            <div class="import-mapping-actions">
+                <button type="button" class="wizard-btn secondary" id="import-mapping-cancel">Annuler</button>
+                <button type="button" class="wizard-btn primary" id="import-mapping-confirm">Oui, importer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="../static/creation_classe.js"></script>
 </body>
 

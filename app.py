@@ -73,30 +73,62 @@ def repartir_eleves():
     if max_per_class is not None and (max_per_class + soft_overflow) * nb_classes < len(eleves):
         return jsonify({'error': 'Capacité insuffisante, même avec une marge de dépassement'}), 400
 
-    # Lancer 1000 itérations et garder le meilleur résultat
+    attempts = [
+        {
+            'name': 'strict',
+            'min_same_school': min_same_school,
+            'relax_hard_constraints': False,
+            'use_school_bonus': True,
+        },
+        {
+            'name': 'no_school_grouping',
+            'min_same_school': None,
+            'relax_hard_constraints': False,
+            'use_school_bonus': False,
+        },
+        {
+            'name': 'tolerant',
+            'min_same_school': None,
+            'relax_hard_constraints': True,
+            'use_school_bonus': False,
+        },
+    ]
+
+    # Lancer plusieurs itérations et garder le meilleur résultat
     best_result = None
     best_score = -float('inf')
+    last_error = None
 
     for iteration in range(1000):
-        result = generate_single_repartition(
-            niveau, nb_classes, eleves, pre_assignations, contraintes, 
-            global_constraints, max_per_class, min_same_school, soft_overflow
-        )
+        for attempt in attempts:
+            result = generate_single_repartition(
+                niveau, nb_classes, eleves, pre_assignations, contraintes,
+                global_constraints, max_per_class, attempt['min_same_school'], soft_overflow,
+                relax_hard_constraints=attempt['relax_hard_constraints'],
+                use_school_bonus=attempt['use_school_bonus']
+            )
 
-        if isinstance(result, tuple) and result[0] is False:
-            # Erreur lors de la génération
-            return jsonify({'error': result[1]}), 400
+            if isinstance(result, tuple) and result[0] is False:
+                last_error = result[1]
+                if 'Pré-assignations' in result[1]:
+                    return jsonify({'error': result[1]}), 400
+                continue
 
-        score = evaluate_repartition(result, eleves, contraintes, global_constraints)
-        if score > best_score:
-            best_score = score
-            best_result = result
+            score = evaluate_repartition(result, eleves, contraintes, global_constraints)
+            if score > best_score:
+                best_score = score
+                best_result = result
+                
+
+    if best_result is None:
+        return jsonify({'error': last_error or 'Impossible de générer une répartition valide'}), 400
 
     return jsonify(best_result)
 
 
 def generate_single_repartition(niveau, nb_classes, eleves, pre_assignations, contraintes, 
-                                global_constraints, max_per_class, min_same_school, soft_overflow):
+                                global_constraints, max_per_class, min_same_school, soft_overflow,
+                                relax_hard_constraints=False, use_school_bonus=True):
     """
     Génère une répartition aléatoire des élèves dans les classes en respectant les contraintes.
     Retourne un dict {class_name: [student_names]} ou une tuple d'erreur (False, message).
@@ -163,11 +195,12 @@ def generate_single_repartition(niveau, nb_classes, eleves, pre_assignations, co
             else:
                 score -= conflicts * 4.0
 
-        # Bonus pour regrouper les élèves d'une même école.
-        school = get_student_school(student)
-        if school:
-            same_school_count = sum(1 for member in class_members if get_student_school(member) == school)
-            score += same_school_count * 2.0
+        # Bonus pour regrouper les élèves d'une même école, uniquement en mode strict.
+        if use_school_bonus:
+            school = get_student_school(student)
+            if school:
+                same_school_count = sum(1 for member in class_members if get_student_school(member) == school)
+                score += same_school_count * 2.0
 
         # L'équilibrage reste un second critère (faible poids).
         score -= len(classes[target_class]) * 0.2
@@ -257,6 +290,9 @@ def generate_single_repartition(niveau, nb_classes, eleves, pre_assignations, co
 
     def can_place_student(student, target_class):
         """Vérifie si student peut être placé dans target_class en respectant toutes ses contraintes."""
+        if relax_hard_constraints:
+            return True
+
         student_contraintes = contraintes.get(student, {}) or {}
         
         avec = student_contraintes.get('avec', [])
