@@ -3,17 +3,20 @@ from static.traitement import resoudre_contraintes
 import json
 import os
 import random
+import smtplib
 from io import BytesIO
 from datetime import datetime
+from email.message import EmailMessage
 
 app = Flask(__name__, static_url_path='/static')
 
+def get_data_file_path():
+    script_dir = os.path.dirname(__file__)
+    return os.path.join(script_dir, 'data', 'data.json')
+
 def load_data_from_json():
     try:
-        # Obtenez le chemin absolu du répertoire de votre script
-        script_dir = os.path.dirname(__file__)
-        # Construisez le chemin complet vers votre fichier JSON en utilisant un chemin relatif
-        json_file_path = os.path.join(script_dir, 'data', 'data.json')
+        json_file_path = get_data_file_path()
         with open(json_file_path, 'r') as json_file:
             data = json.load(json_file)
         return data
@@ -27,6 +30,56 @@ loaded_data = load_data_from_json()
 @app.route('/')
 def home():
     return render_template('accueil.html')
+
+
+@app.route('/feedback', methods=['POST'])
+def send_feedback():
+    payload = request.get_json() or {}
+    sender_name = (payload.get('name') or '').strip()
+    sender_email = (payload.get('email') or '').strip()
+    message = (payload.get('message') or '').strip()
+
+    if len(message) < 5:
+        return jsonify({'error': 'Le message est trop court.'}), 400
+
+    smtp_host = os.getenv('FEEDBACK_SMTP_HOST', 'smtp.gmail.com')
+    smtp_port = int(os.getenv('FEEDBACK_SMTP_PORT', '587'))
+    smtp_user = os.getenv('FEEDBACK_SMTP_USER', '').strip()
+    smtp_password = os.getenv('FEEDBACK_SMTP_PASSWORD', '').strip()
+    mail_to = os.getenv('FEEDBACK_TO', 'gregoire.gary8@gmail.com').strip()
+    mail_from = os.getenv('FEEDBACK_FROM', smtp_user or 'no-reply@outil-scolarite.local').strip()
+
+    if not smtp_user or not smtp_password:
+        return jsonify({
+            'error': 'Configuration SMTP manquante. Définis FEEDBACK_SMTP_USER et FEEDBACK_SMTP_PASSWORD côté serveur.'
+        }), 500
+
+    subject = '[Outil Conseils] Nouvelle idee/recommandation'
+    lines = [
+        'Nouvelle suggestion envoyee depuis la page d accueil.',
+        '',
+        f'Nom: {sender_name or "Non renseigne"}',
+        f'Email: {sender_email or "Non renseigne"}',
+        '',
+        'Message:',
+        message,
+    ]
+
+    email_message = EmailMessage()
+    email_message['Subject'] = subject
+    email_message['From'] = mail_from
+    email_message['To'] = mail_to
+    email_message.set_content('\n'.join(lines))
+
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_password)
+            server.send_message(email_message)
+    except Exception:
+        return jsonify({'error': "L'envoi de l'email a echoue. Verifie la configuration SMTP."}), 500
+
+    return jsonify({'status': 'success'})
 
 @app.route('/conseils-de-classe')
 def conseils_de_classe():
@@ -569,41 +622,110 @@ def upload_file():
     print(data)  # Affiche les données dans le terminal pour vérification
     return jsonify({'status': 'success'})
 
+
+@app.route('/update', methods=['POST'])
+def update_data():
+    payload = request.get_json() or {}
+    professors = payload.get('professors')
+
+    if not isinstance(professors, list):
+        return jsonify({'error': "Format invalide: 'professors' doit être une liste"}), 400
+
+    normalized_professors = []
+    class_keys = ["61", "62", "63", "64", "51", "52", "53", "54", "41", "42", "43", "44", "31", "32", "33", "34"]
+    session_keys = ["S1L1", "S1L2", "S1M1", "S1M2", "S1J1", "S1J2", "S2L1", "S2L2", "S2M1", "S2M2", "S2J1", "S2J2"]
+
+    for p in professors:
+        if not isinstance(p, dict):
+            continue
+
+        name = (p.get('name') or '').strip()
+        subject = (p.get('subject') or '').strip()
+        pp = (p.get('PP') or '-').strip() or '-'
+
+        if not name:
+            continue
+
+        normalized = {
+            'name': name,
+            'subject': subject,
+            'PP': pp,
+        }
+
+        for ck in class_keys:
+            normalized[f'c{ck}'] = bool(p.get(f'c{ck}', False))
+
+        for sk in session_keys:
+            normalized[sk] = bool(p.get(sk, False))
+
+        normalized_professors.append(normalized)
+
+    data_to_save = {'professors': normalized_professors}
+
+    try:
+        with open(get_data_file_path(), 'w', encoding='utf-8') as json_file:
+            json.dump(data_to_save, json_file, ensure_ascii=False, indent=2)
+    except OSError:
+        return jsonify({'error': "Impossible d'écrire data/data.json"}), 500
+
+    global loaded_data
+    loaded_data = data_to_save
+
+    return jsonify({'status': 'success', 'count': len(normalized_professors)})
+
 @app.route('/trouver_creneau', methods=['POST'])
 def trouver_creneau():
-    # Récupérer les données du formulaire
-    data = request.get_json()
-    
-        # Préparation des données
+    data = request.get_json() or []
 
-    # Dictionnaire pour stocker les classes avec les professeurs et leurs disponibilités
+    if not isinstance(data, list):
+        return jsonify({'error': 'Format invalide: liste de professeurs attendue'}), 400
+
     classes = {}
+    ignored_rows = 0
 
-    # Parcourir les données
     for professor in data:
-        name = professor['name']
-        classes_list = professor['classes']
-        sessions_list = professor['sessions']
-        
-        # Associer les professeurs aux classes avec leurs disponibilités
+        if not isinstance(professor, dict):
+            ignored_rows += 1
+            continue
+
+        name = (professor.get('name') or '').strip()
+        classes_list = professor.get('classes') or []
+        sessions_list = professor.get('sessions') or []
+
+        if not name or not isinstance(classes_list, list) or not isinstance(sessions_list, list):
+            ignored_rows += 1
+            continue
+
+        if not classes_list or not sessions_list:
+            ignored_rows += 1
+            continue
+
         for class_number in classes_list:
+            class_number = str(class_number).strip()
+            if not class_number:
+                continue
             if class_number not in classes:
                 classes[class_number] = {}
             classes[class_number][name] = sessions_list
 
-    # Afficher le résultat
+    if not classes:
+        return jsonify({'error': 'Aucune donnée exploitable: renseignez au moins un professeur avec classes et disponibilités'}), 400
 
     print("***********************Lancement traitement************************")
-    
-    # Résoudre les contraintes
+
     assignations = resoudre_contraintes(classes)
 
-    # Afficher les résultats
     print("Assignation des créneaux aux classes :")
     print(assignations)
 
-    # Envoyer la réponse au client au format JSON
-    return jsonify(assignations)
+    if not isinstance(assignations, dict):
+        return jsonify({'error': 'Le moteur de résolution a retourné un format inattendu'}), 500
+
+    response = dict(assignations)
+    if ignored_rows:
+        response['_warning'] = f'{ignored_rows} ligne(s) ont été ignorées (incomplètes ou invalides).'
+
+    return jsonify(response)
 
 # Route pour télécharger le modèle Excel
 @app.route('/telecharger_modele')

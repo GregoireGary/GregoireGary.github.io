@@ -9,30 +9,57 @@
 </head>
 
 <body class="home-body">
+    <div class="home-bg-orb home-bg-orb-a"></div>
+    <div class="home-bg-orb home-bg-orb-b"></div>
     <main class="home-wrapper">
-        <section class="home-hero">
-            <p class="home-kicker">Coucou Karine</p>
-            <h1 class="home-title">Qu'est ce que l'on fait aujourd'hui ?</h1>
+        <section class="home-hero home-animate-rise">
+            <p class="home-kicker">Assistant organisation scolaire</p>
+            <h1 class="home-title">Plateforme de preparation pedagogique</h1>
             <p class="home-subtitle">
-                Cet outil te permet soit de préparer les conseils de classes,
-                soit de travailler sur la creation de classes.
+                Cet outil accompagne les equipes pedagogiques pour organiser les conseils de classe
+                et preparer la repartition des eleves avec une interface simple et collaborative.
             </p>
+            <button type="button" id="openFeedback" class="home-feedback-btn">Envoyer une idee / recommandation</button>
         </section>
 
         <section class="home-grid">
-            <a class="home-card" href="{{ url_for('conseils_de_classe') }}">
+            <a class="home-card home-animate-rise home-delay-1" href="{{ url_for('conseils_de_classe') }}">
                 <h2>Conseils de classe</h2>
-                <p>Lancer les calculs de creneaux en fonction des disponibilites des professeurs.</p>
+                <p>Lancer les calculs de creneaux selon les disponibilites des enseignants.</p>
                 <span class="home-card-cta">Ouvrir</span>
             </a>
 
-            <a class="home-card" href="{{ url_for('creation_classe') }}">
+            <a class="home-card home-animate-rise home-delay-2" href="{{ url_for('creation_classe') }}">
                 <h2>Creation de classe</h2>
-                <p>Acceder a l'espace dedie a la construction et l'organisation des classes.</p>
+                <p>Construire des classes equilibrees a partir des contraintes pedagogiques.</p>
                 <span class="home-card-cta">Ouvrir</span>
             </a>
         </section>
     </main>
+
+    <div id="feedbackModal" class="home-modal" aria-hidden="true">
+        <div class="home-modal-card" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+            <button type="button" id="closeFeedback" class="home-modal-close" aria-label="Fermer">x</button>
+            <h2 id="feedbackTitle">Envoyer une idee</h2>
+            <form id="feedbackForm" class="home-feedback-form">
+                <label for="feedbackName">Nom (optionnel)</label>
+                <input id="feedbackName" name="name" type="text" maxlength="120">
+
+                <label for="feedbackEmail">Email (optionnel)</label>
+                <input id="feedbackEmail" name="email" type="email" maxlength="160" placeholder="exemple@etablissement.fr">
+
+                <label for="feedbackMessage">Message</label>
+                <textarea id="feedbackMessage" name="message" rows="5" required maxlength="2500" placeholder="Partagez votre idee ou recommandation..."></textarea>
+
+                <div class="home-feedback-actions">
+                    <button type="submit" id="sendFeedbackBtn" class="home-feedback-send">Envoyer</button>
+                </div>
+                <p id="feedbackStatus" class="home-feedback-status" role="status" aria-live="polite"></p>
+            </form>
+        </div>
+    </div>
+
+    <script src="../static/home.js"></script>
 </body>
 
 </html>

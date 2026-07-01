@@ -1,208 +1,314 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disponibilités des Professeurs</title>
+    <title>Conseils de classe</title>
     <link rel="stylesheet" href="../static/styles.css">
 </head>
 
-<body>
-    <div class="page-nav">
-        <a href="{{ url_for('home') }}">Retour a l'accueil</a>
-    </div>
-    <h1> Disponibilités des Professeurs <button type="button" id="Find" class="find-button right-button">Lancer calcul</button></h1>
-    <form id="availabilityForm">
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th colspan="3"></th> <!-- Colspan 2 pour les deux premières colonnes (Nom du Professeur et Matière) -->
-                        <th colspan="16">Classes</th> <!-- Colspan 20 pour les 20 colonnes suivantes -->
-                        <th colspan="6">Semaine 1</th> <!-- Colspan 20 pour les 20 colonnes suivantes -->
-                        <th colspan="6">Semaine 2</th> <!-- Colspan 20 pour les 20 colonnes suivantes -->
-                    </tr>
-                    <tr class="fixed-header-row">
-                        <th>Nom du Professeur</th>
-                        <th>Matière</th>
-                        <th>PP de la classe</th>
-                        <th>61</th>
-                        <th>62</th>
-                        <th>63</th>
-                        <th>64</th>
-                        <th>51</th>
-                        <th>52</th>
-                        <th>53</th>
-                        <th>54</th>
-                        <th>41</th>
-                        <th>42</th>
-                        <th>43</th>
-                        <th>44</th>
-                        <th>31</th>
-                        <th>32</th>
-                        <th>33</th>
-                        <th>34</th>
-                        <th>Lundi 1</th>
-                        <th>Lundi 2</th>
-                        <th>Mardi 1</th>
-                        <th>Mardi 2</th>
-                        <th>Jeudi 1</th>
-                        <th>Jeudi 2</th>
-                        <th>Lundi 1</th>
-                        <th>Lundi 2</th>
-                        <th>Mardi 1</th>
-                        <th>Mardi 2</th>
-                        <th>Jeudi 1</th>
-                        <th>Jeudi 2</th>
-                        <!-- Ajoutez d'autres jours et sessions ici -->
-                    </tr>
-                </thead>
-                <tbody id="professorsTableBody">
-                    {% for professor in data.professors %}
-                    <tr>
-                        <td><input type="text" name="professor_name[]" value="{{ professor.name }}"></td>
-                        <td>
-                            <select name="professor_subject[]">
-                                <option value="math" {% if professor.subject == 'math' %} selected {% endif %}>Math</option>
-                                <option value="frs" {% if professor.subject == 'frs' %} selected {% endif %}>Frs</option>
-                                <option value="SC" {% if professor.subject == 'sc' %} selected {% endif %}>SC</option>
-                                <option value="ang" {% if professor.subject == 'ang' %} selected {% endif %}>ang</option>
-                                <option value="HG" {% if professor.subject == 'HG' %} selected {% endif %}>HG</option>
-                                <option value="art" {% if professor.subject == 'art' %} selected {% endif %}>art</option>
-                                <option value="EPS" {% if professor.subject == 'EPS' %} selected {% endif %}>EPS</option>
-                                <option value="LV2" {% if professor.subject == 'LV2' %} selected {% endif %}>LV2</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select name="professor_PP[]">
-                                <option value="-" {% if professor.PP == '-' %} selected {% endif %}>-</option>
-                                <option value="61" {% if professor.PP == '61' %} selected {% endif %}>61</option>
-                                <option value="62" {% if professor.PP == '62' %} selected {% endif %}>62</option>
-                                <option value="63" {% if professor.PP == '63' %} selected {% endif %}>63</option>
-                                <option value="64" {% if professor.PP == '64' %} selected {% endif %}>64</option>
-                                <option value="51" {% if professor.PP == '51' %} selected {% endif %}>51</option>
-                                <option value="52" {% if professor.PP == '52' %} selected {% endif %}>52</option>
-                                <option value="53" {% if professor.PP == '53' %} selected {% endif %}>53</option>
-                                <option value="54" {% if professor.PP == '54' %} selected {% endif %}>54</option>
-                                <option value="41" {% if professor.PP == '41' %} selected {% endif %}>41</option>
-                                <option value="42" {% if professor.PP == '42' %} selected {% endif %}>42</option>
-                                <option value="43" {% if professor.PP == '43' %} selected {% endif %}>43</option>
-                                <option value="44" {% if professor.PP == '44' %} selected {% endif %}>44</option>
-                                <option value="31" {% if professor.PP == '31' %} selected {% endif %}>31</option>
-                                <option value="32" {% if professor.PP == '32' %} selected {% endif %}>32</option>
-                                <option value="33" {% if professor.PP == '33' %} selected {% endif %}>33</option>
-                                <option value="34" {% if professor.PP == '34' %} selected {% endif %}>34</option>                            
-                            </select>
-                        </td>
-                        <td><input type="checkbox" name="61[]" {% if professor.c61 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="62[]" {% if professor.c62 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="63[]" {% if professor.c63 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="64[]" {% if professor.c64 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="51[]" {% if professor.c51 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="52[]" {% if professor.c52 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="53[]" {% if professor.c53 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="54[]" {% if professor.c54 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="41[]" {% if professor.c41 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="42[]" {% if professor.c42 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="43[]" {% if professor.c43 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="44[]" {% if professor.c44 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="31[]" {% if professor.c31 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="32[]" {% if professor.c32 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="33[]" {% if professor.c33 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="34[]" {% if professor.c34 %} checked {% endif %}></td>
-        
-                        <td><input type="checkbox" name="S1L1[]" {% if professor.S1L1 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S1L2[]" {% if professor.S1L2 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S1M1[]" {% if professor.S1M1 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S1M2[]" {% if professor.S1M2 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S1J1[]" {% if professor.S1J1 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S1J2[]" {% if professor.S1J2 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S2L1[]" {% if professor.S2L1 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S2L2[]" {% if professor.S2L2 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S2M1[]" {% if professor.S2M1 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S2M2[]" {% if professor.S2M2 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S2J1[]" {% if professor.S2J1 %} checked {% endif %}></td>
-                        <td><input type="checkbox" name="S2J2[]" {% if professor.S2J2 %} checked {% endif %}></td>
-                        <!-- Ajoutez d'autres cases à cocher en fonction de votre structure JSON -->
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<body class="wizard-body">
+    <div class="wizard-wrapper conseils-wrapper">
+
+        <div class="wizard-header">
+            <a class="wizard-back-link" href="{{ url_for('home') }}">← Accueil</a>
+            <h1 class="wizard-title">Conseils de classe</h1>
         </div>
-        <button type="button" id="addRowButton" class="find-button left-button">Ajouter un Professeur</button>
-        <!-- <button type="submit" class="find-button left-button">Enregistrer</button> -->
-    </form>
-    <!-- Conteneur pour les boutons Télécharger et Importer -->
-    <div class="action-buttons">
-        <!-- Bouton Télécharger -->
-        <div class="download-button">
-            <a href="{{ url_for('telecharger_modele') }}">
-                <button>Télécharger le Modèle Excel</button>
-            </a>
+
+        <div class="wizard-steps" id="conseils-steps">
+            <div class="wizard-step-item active" id="conseils-step-indicator-1">
+                <div class="wizard-step-circle">1</div>
+                <span class="wizard-step-label">Niveaux</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-item" id="conseils-step-indicator-2">
+                <div class="wizard-step-circle">2</div>
+                <span class="wizard-step-label">Classes par niveau</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-item" id="conseils-step-indicator-3">
+                <div class="wizard-step-circle">3</div>
+                <span class="wizard-step-label">Jours et créneaux</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-item" id="conseils-step-indicator-4">
+                <div class="wizard-step-circle">4</div>
+                <span class="wizard-step-label">Professeurs</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-item" id="conseils-step-indicator-5">
+                <div class="wizard-step-circle">5</div>
+                <span class="wizard-step-label">Contraintes professeurs</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-item" id="conseils-step-indicator-6">
+                <div class="wizard-step-circle">6</div>
+                <span class="wizard-step-label">Resultats</span>
+            </div>
         </div>
-        
-        <!-- Bouton Importer -->
-        <div class="import-button">
-            <label for="file-upload" class="import-label">
-                <button>Importer</button>
-            </label>
-            <input type="file" id="file-upload" accept=".xlsx, .xls" style="display: none;">
+
+        <div class="wizard-panel active" id="conseils-panel-1">
+            <h2 class="wizard-panel-title">Etape 1 - Selection des niveaux</h2>
+            <p class="wizard-panel-hint">Cliquez sur un ou plusieurs niveaux. Un bouton selectionne devient bleu.</p>
+
+            <div class="level-grid conseils-level-grid">
+                <label class="level-card conseils-level-card">
+                    <input type="checkbox" name="conseils_niveaux" value="6eme">
+                    <span class="level-card-inner">6eme</span>
+                </label>
+                <label class="level-card conseils-level-card">
+                    <input type="checkbox" name="conseils_niveaux" value="5eme">
+                    <span class="level-card-inner">5eme</span>
+                </label>
+                <label class="level-card conseils-level-card">
+                    <input type="checkbox" name="conseils_niveaux" value="4eme">
+                    <span class="level-card-inner">4eme</span>
+                </label>
+                <label class="level-card conseils-level-card">
+                    <input type="checkbox" name="conseils_niveaux" value="3eme">
+                    <span class="level-card-inner">3eme</span>
+                </label>
+            </div>
+
+            <p class="wizard-error hidden" id="conseils-error-1">Veuillez selectionner au moins un niveau.</p>
         </div>
+
+        <div class="wizard-panel" id="conseils-panel-2">
+            <h2 class="wizard-panel-title">Etape 2 - Combien de classes par niveau ?</h2>
+            <p class="wizard-panel-hint">Indiquez le nombre de classes pour chaque niveau selectionne.</p>
+
+            <div id="conseils-classes-grid" class="conseils-classes-grid"></div>
+
+            <p class="wizard-error hidden" id="conseils-error-2">Veuillez choisir un nombre de classes pour chaque niveau.</p>
+
+            <div class="conseils-summary" id="conseils-summary"></div>
+        </div>
+
+        <div class="wizard-panel" id="conseils-panel-3">
+            <h2 class="wizard-panel-title">Etape 3 - Parametrage des conseils</h2>
+            <p class="wizard-panel-hint">Les questions sont progressives: intervalle de dates, choix des jours ouvrés dans cet intervalle, puis nombre de créneaux par jour.</p>
+
+            <section class="conseils-schedule-card">
+                <h3>1. Je veux caler mes conseils entre</h3>
+                <div class="conseils-date-range">
+                    <label class="gc-field">
+                        <span>Choisir date (debut)</span>
+                        <input type="date" id="conseils-date-start">
+                    </label>
+                    <label class="gc-field">
+                        <span>Choisir date (fin)</span>
+                        <input type="date" id="conseils-date-end">
+                    </label>
+                </div>
+            </section>
+
+            <section class="conseils-schedule-card">
+                <h3>2. Je propose les dates ouvrées dans cet intervalle</h3>
+                <p class="wizard-panel-hint">Sélectionnez les dates qui vous conviennent.</p>
+                <div id="conseils-available-dates" class="conseils-available-dates">
+                    <p class="wizard-panel-hint">Choisissez d'abord un intervalle de dates.</p>
+                </div>
+            </section>
+
+            <section class="conseils-schedule-card" id="conseils-generic-slots-card">
+                <h3 id="conseils-generic-slots-title">3. Combien de creneaux par jour ?</h3>
+                <div class="nb-grid" id="conseils-generic-slots-grid">
+                    <label class="nb-card"><input type="radio" name="conseils_slot_count" value="1"><span>1</span></label>
+                    <label class="nb-card"><input type="radio" name="conseils_slot_count" value="2"><span>2</span></label>
+                    <label class="nb-card"><input type="radio" name="conseils_slot_count" value="3"><span>3</span></label>
+                    <label class="nb-card"><input type="radio" name="conseils_slot_count" value="4"><span>4</span></label>
+                    <label class="nb-card"><input type="radio" name="conseils_slot_count" value="5"><span>5</span></label>
+                </div>
+                <div class="conseils-specific-toggle-wrap">
+                    <button type="button" id="conseils-toggle-specific-slots" class="wizard-btn secondary conseils-specific-toggle-btn">Creneaux specifiques</button>
+                </div>
+                <div id="conseils-specific-slots" class="conseils-specific-slots hidden">
+                    <p class="wizard-panel-hint">Reglez le nombre de creneaux pour chaque jour selectionne.</p>
+                    <div id="conseils-specific-slots-grid" class="conseils-specific-slots-grid"></div>
+                </div>
+            </section>
+
+            <div class="conseils-summary" id="conseils-schedule-summary">
+                <p class="wizard-panel-hint">Resume: en attente du parametrage des dates et des creneaux.</p>
+            </div>
+
+            <p class="wizard-error hidden" id="conseils-error-3">Veuillez definir un intervalle valide, selectionner au moins une date, puis choisir un nombre de creneaux par jour.</p>
+        </div>
+
+        <div class="wizard-panel" id="conseils-panel-4">
+            <h2 class="wizard-panel-title">Etape 4 - Professeurs</h2>
+            <p class="wizard-panel-hint">Vous pouvez soit importer un fichier, soit telecharger un modele base sur votre configuration, soit saisir les professeurs manuellement.</p>
+            <p class="wizard-panel-hint">Pour l import, le systeme detecte automatiquement les colonnes: nom du professeur, classes de professeur principal (formats acceptes: 52, 5e2, 5eme2, 5 em2), puis colonnes de classes via les entetes (ex: 6e1, 61, 6eme1, 6 eme 1). L ordre habituel col1 col2 col3... reste prioritaire si coherent.</p>
+
+            <div class="conseils-method-grid">
+                <button type="button" id="conseils-open-import" class="conseils-method-card active">
+                    <span class="conseils-method-title">Importer un fichier</span>
+                    <span class="conseils-method-text">CSV ou Excel avec une colonne par classe.</span>
+                </button>
+                <button type="button" id="conseils-download-template" class="conseils-method-card conseils-method-card-accent">
+                    <span class="conseils-method-title">Telecharger le modele Excel</span>
+                    <span class="conseils-method-text">Genere automatiquement a partir des classes choisies.</span>
+                </button>
+                <button type="button" id="conseils-open-manual" class="conseils-method-card">
+                    <span class="conseils-method-title">Tout faire manuellement</span>
+                    <span class="conseils-method-text">Ajoutez les professeurs et cochez leurs classes.</span>
+                </button>
+            </div>
+
+            <div id="conseils-expected-wrap" class="conseils-expected-wrap">
+                <div class="conseils-expected-title">Colonnes attendues</div>
+                <div id="conseils-expected-columns" class="conseils-expected-columns"></div>
+            </div>
+
+            <div id="conseils-import-block" class="conseils-source-block">
+                <div class="csv-zone" id="conseils-csv-zone">
+                    <input type="file" id="conseils-csv-file" accept=".csv,.xlsx,.xls" class="csv-file-input">
+                    <div class="csv-zone-label">
+                        <span class="csv-zone-icon">📄</span>
+                        <p>Glisser-deposer un fichier CSV ou Excel<br>ou <strong>cliquer pour choisir</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="conseils-manual-block" class="conseils-source-block hidden">
+                <div class="conseils-manual-empty">
+                    Le mode manuel est actif. Vous pourrez ajouter et modifier les professeurs a l etape suivante.
+                </div>
+            </div>
+
+            <div id="conseils-import-result" class="hidden">
+                <p class="students-count" id="conseils-prof-count"></p>
+                <div class="import-preview-wrap conseils-import-preview-wrap">
+                    <table class="import-preview-table">
+                        <thead id="conseils-import-head"></thead>
+                        <tbody id="conseils-import-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <p class="wizard-error hidden" id="conseils-error-4">Veuillez importer un fichier valide avec au moins un professeur.</p>
+        </div>
+
+        <div class="wizard-panel" id="conseils-panel-5">
+            <h2 class="wizard-panel-title">Etape 5 - Contraintes par professeur</h2>
+            <p class="wizard-panel-hint">Tableau récapitulatif des professeurs et de leurs classes. Sélectionnez un professeur puis ajoutez ses contraintes dans le panneau de droite.</p>
+
+            <div class="conseils-constraints-layout">
+                <section class="conseils-constraints-left">
+                    <div class="conseils-manual-table-wrap conseils-prof-summary-wrap">
+                        <table class="import-preview-table conseils-prof-summary-table">
+                            <thead id="conseils-prof-summary-head"></thead>
+                            <tbody id="conseils-prof-summary-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="conseils-step5-prof-toolbar">
+                        <button type="button" id="conseils-add-prof-step5" class="wizard-btn secondary">Ajouter un professeur</button>
+                    </div>
+                </section>
+
+                <aside class="conseils-constraints-right">
+                    <div class="conseils-constraint-editor" id="conseils-constraint-editor">
+                        <section class="conseils-prof-edit-wrap">
+                            <label class="gc-field">
+                                <span>Nom du professeur</span>
+                                <input type="text" id="conseils-prof-edit-name" placeholder="Nom prenom">
+                            </label>
+                            <div class="gc-field">
+                                <span>Classes associees <span class="conseils-hint-small">cliquez pour changer le statut</span></span>
+                                <div id="conseils-prof-edit-classes" class="conseils-prof-edit-classes"></div>
+                                <div class="conseils-class-legend">
+                                     <span class="conseils-class-legend-item state-main">Jaune = Professeur principal</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <form id="conseils-constraint-form" class="conseils-constraint-form">
+                            <label class="gc-field">
+                                <span>Type de contrainte</span>
+                                <select id="conseils-constraint-type">
+                                    <option value="day_weekday">Pas dispo les jours x</option>
+                                    <option value="slot_weekday">Pas dispo créneau x les jours x</option>
+                                    <option value="day_date">Pas dispo le jour x</option>
+                                    <option value="slot_date">Pas dispo créneau x le jour x</option>
+                                </select>
+                            </label>
+
+                            <label class="gc-field hidden" id="conseils-constraint-slot-wrap">
+                                <span>Créneau</span>
+                                <input type="number" id="conseils-constraint-slot" min="1" max="10" step="1" value="1">
+                            </label>
+
+                            <div class="gc-field" id="conseils-constraint-weekdays-wrap">
+                                <span>Jours de semaine</span>
+                                <div id="conseils-constraint-weekdays" class="conseils-weekday-grid"></div>
+                            </div>
+
+                            <label class="gc-field hidden" id="conseils-constraint-date-wrap">
+                                <span>Jour précis</span>
+                                <select id="conseils-constraint-date"></select>
+                            </label>
+
+                            <button type="button" id="conseils-add-constraint" class="wizard-btn primary conseils-add-constraint-btn">Ajouter la contrainte</button>
+                        </form>
+
+                        <div class="conseils-constraint-list-wrap">
+                            <div class="conseils-expected-title">Contraintes enregistrées</div>
+                            <ul id="conseils-constraint-list" class="conseils-constraint-list"></ul>
+                        </div>
+
+                        <div class="conseils-prof-delete-wrap">
+                            <button type="button" id="conseils-remove-prof-step5" class="conseils-delete-prof-btn">Supprimer le professeur</button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <p class="wizard-error hidden" id="conseils-error-5">Veuillez selectionner un professeur avant d'ajouter une contrainte.</p>
+        </div>
+
+        <div class="wizard-panel" id="conseils-panel-6">
+            <h2 class="wizard-panel-title">Etape 6 - Proposition de repartition</h2>
+            <p class="wizard-panel-hint">Le calcul reprend la mecanique historique: une proposition de creneau par classe en tenant compte des disponibilites et contraintes.</p>
+
+            <div class="conseils-results-toolbar">
+                <button type="button" id="conseils-run-results" class="wizard-btn primary">Generer une proposition</button>
+                <span id="conseils-results-status" class="wizard-panel-hint conseils-results-status">En attente de calcul.</span>
+            </div>
+
+            <div id="conseils-results-warning" class="wizard-panel-hint conseils-results-warning hidden"></div>
+
+            <div id="conseils-results-metrics" class="conseils-results-metrics"></div>
+
+            <div class="conseils-results-card-wrap" id="conseils-results-card-wrap">
+                <div id="conseils-results-calendar" class="conseils-results-calendar"></div>
+            </div>
+
+            <p class="wizard-error hidden" id="conseils-error-6">Impossible de generer une proposition pour le moment.</p>
+
+            <div id="conseils-drag-validation-modal" class="conseils-drag-validation-modal hidden">
+                <div class="conseils-drag-validation-backdrop"></div>
+                <div class="conseils-drag-validation-content">
+                    <h3 class="conseils-drag-validation-title">Valider le déplacement</h3>
+                    <div id="conseils-drag-validation-summary" class="conseils-drag-validation-summary"></div>
+                    <div id="conseils-drag-validation-warnings" class="conseils-drag-validation-warnings"></div>
+                    <div class="conseils-drag-validation-actions">
+                        <button type="button" id="conseils-drag-cancel" class="wizard-btn secondary">Annuler</button>
+                        <button type="button" id="conseils-drag-confirm" class="wizard-btn primary">Confirmer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-nav" id="conseils-nav">
+            <button class="wizard-btn secondary hidden" id="conseils-btn-prev">← Precedent</button>
+            <button class="wizard-btn primary" id="conseils-btn-next">Suivant →</button>
+        </div>
+
     </div>
 
-    <div id="myPopup" class="popup" >
-        <div class="popup-content">
-            <h2>Les données ont été enregistrées.</h2>
-        </div>
-    </div>
-
-    <div id="popupContainer" class="popup">
-        <div class="popup-content">
-            <h2>Proposition de créneaux</h2>
-            <table id="resultTable">
-                <thead>
-                    <tr>
-                        <th colspan="1"></th>
-                        <th colspan="3">Semaine 1</th>
-                        <th colspan="3">Semaine 2</th>
-                    </tr>
-                    <tr>
-                        <th>Créneau</th>
-                        <th>Lundi</th>
-                        <th>Mardi</th>
-                        <th>Jeudi</th>
-                        <th>Lundi</th>
-                        <th>Mardi</th>
-                        <th>Jeudi</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr id="row1">
-                        <td class="creneau-cell">16h30 - 17h30</td>
-                        <td id="RS1L1" class="creneau-result"></td>
-                        <td id="RS1M1" class="creneau-result"></td>
-                        <td id="RS1J1" class="creneau-result"></td>
-                        <td id="RS2L1" class="creneau-result"></td>
-                        <td id="RS2M1" class="creneau-result"></td>
-                        <td id="RS2J1" class="creneau-result"></td>
-                    </tr>
-                    <tr id="row2">
-                        <td class="creneau-cell">17h30 - 18h30</td>
-                        <td id="RS1L2" class="creneau-result"></td>
-                        <td id="RS1M2" class="creneau-result"></td>
-                        <td id="RS1J2" class="creneau-result"></td>
-                        <td id="RS2L2" class="creneau-result"></td>
-                        <td id="RS2M2" class="creneau-result"></td>
-                        <td id="RS2J2" class="creneau-result"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <P id="creneauxNonTrouves"></P>
-            <button id="closePopupButton">Fermer</button>
-        </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="../static/conseils_wizard.js"></script>
 </body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
-<script src="../static/script.js"></script>
+
 </html>

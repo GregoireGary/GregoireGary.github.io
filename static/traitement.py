@@ -12,6 +12,10 @@ def resoudre_contraintesplus(disponibilites):
         dates_libres = set.intersection(*(set(dates) for dates in professeurs.values()))
         disponibilites_classes[classe] = list(dates_libres)
 
+    # Empêche explicitement qu'un professeur soit planifié sur deux classes
+    # au même créneau (règle globale inter-classes).
+    creneaux_deja_pris_par_prof = defaultdict(set)
+
     # Trouvez un créneau où tous les professeurs d'une classe sont libres
     creneaux_attribues = {}
     for classe, dates_libres in disponibilites_classes.items():
@@ -20,12 +24,16 @@ def resoudre_contraintesplus(disponibilites):
         for date in dates_libres:
             # Vérifiez si tous les professeurs de la classe sont disponibles à cette date
             professeurs_disponibles = [prof for prof, dates in disponibilites[classe].items() if date in dates]
-            if len(professeurs_disponibles) == len(disponibilites[classe]):
+            if len(professeurs_disponibles) == len(disponibilites[classe]) and all(
+                date not in creneaux_deja_pris_par_prof[prof]
+                for prof in professeurs_disponibles
+            ):
 
                 creneaux_attribues[classe] = date
 
                 # Mettez à jour les disponibilités des professeurs en enlevant la date attribuée
                 for prof in professeurs_disponibles:
+                    creneaux_deja_pris_par_prof[prof].add(date)
                     disponibilites[classe][prof].remove(date)
                 break
 
